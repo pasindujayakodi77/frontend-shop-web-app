@@ -35,6 +35,16 @@ const Dashboard = () => {
       }
 
       const data = await response.json();
+      
+      // If category is not in API response, check localStorage
+      if (!data.category || !data.shopCategory) {
+        const localCategory = localStorage.getItem("userCategory");
+        if (localCategory) {
+          data.category = localCategory;
+          data.shopCategory = localCategory;
+        }
+      }
+      
       setUser(data);
       setLoading(false);
     } catch (err) {
@@ -155,7 +165,7 @@ const Dashboard = () => {
             Welcome, {user?.name || "User"}! 👋
           </h2>
           <p className="text-lg text-gray-600">
-            Shop Category: <span className={`font-semibold ${themeColors.primaryText}`}>{user?.category || "N/A"}</span>
+            Shop Category: <span className={`font-semibold ${themeColors.primaryText}`}>{user?.category || user?.shopCategory || "N/A"}</span>
           </p>
         </div>
 

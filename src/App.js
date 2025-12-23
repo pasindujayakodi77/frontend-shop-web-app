@@ -3,6 +3,7 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import CategorySelection from "./components/CategorySelection";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -11,8 +12,22 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/select-category" element={<CategorySelection />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route 
+          path="/select-category" 
+          element={
+            <ProtectedRoute>
+              <CategorySelection />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
       </Routes>
     </Router>
   );

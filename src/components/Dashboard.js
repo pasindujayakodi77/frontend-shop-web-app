@@ -53,6 +53,53 @@ const Dashboard = () => {
     alert(`Navigation to ${path} - Feature coming soon!`);
   };
 
+  // Function to get theme colors based on shop category
+  const getThemeColors = (category) => {
+    const themes = {
+      "Computer Shop": {
+        header: "bg-blue-600",
+        stats: "text-blue-600",
+        primary: "bg-blue-600",
+        primaryHover: "hover:bg-blue-700",
+        primaryText: "text-blue-600",
+        primaryBorder: "border-blue-600",
+        light: "bg-blue-50",
+        lightHover: "hover:bg-blue-100",
+        lightBorder: "hover:border-blue-500",
+        gradient: "from-blue-500 to-blue-700"
+      },
+      "Grocery Store": {
+        header: "bg-green-600",
+        stats: "text-green-600",
+        primary: "bg-green-600",
+        primaryHover: "hover:bg-green-700",
+        primaryText: "text-green-600",
+        primaryBorder: "border-green-600",
+        light: "bg-green-50",
+        lightHover: "hover:bg-green-100",
+        lightBorder: "hover:border-green-500",
+        gradient: "from-green-500 to-green-700"
+      },
+      "Clothing Store": {
+        header: "bg-pink-600",
+        stats: "text-pink-600",
+        primary: "bg-pink-600",
+        primaryHover: "hover:bg-pink-700",
+        primaryText: "text-pink-600",
+        primaryBorder: "border-pink-600",
+        light: "bg-pink-50",
+        lightHover: "hover:bg-pink-100",
+        lightBorder: "hover:border-pink-500",
+        gradient: "from-pink-500 to-pink-700"
+      }
+    };
+
+    // Return default theme (blue) if category not found
+    return themes[category] || themes["Computer Shop"];
+  };
+
+  const themeColors = getThemeColors(user?.category);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -86,10 +133,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-md">
+      <header className={`${themeColors.header} text-white shadow-md`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Shop Management Dashboard</h1>
+            <h1 className="text-2xl font-bold">Shop Management Dashboard</h1>
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-200"
@@ -108,7 +155,7 @@ const Dashboard = () => {
             Welcome, {user?.name || "User"}! 👋
           </h2>
           <p className="text-lg text-gray-600">
-            Shop Category: <span className="font-semibold text-blue-600">{user?.category || "N/A"}</span>
+            Shop Category: <span className={`font-semibold ${themeColors.primaryText}`}>{user?.category || "N/A"}</span>
           </p>
         </div>
 
@@ -122,7 +169,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
+                  <p className={`text-3xl font-bold ${themeColors.stats}`}>{stat.value}</p>
                 </div>
                 <div className={`${stat.color} text-white text-4xl p-3 rounded-full`}>
                   {stat.icon}
@@ -140,7 +187,7 @@ const Dashboard = () => {
               <button
                 key={index}
                 onClick={item.action}
-                className={`p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition duration-200 ${
+                className={`p-4 rounded-lg border-2 border-gray-200 ${themeColors.lightBorder} ${themeColors.lightHover} transition duration-200 ${
                   item.label === "Logout" ? "hover:border-red-500 hover:bg-red-50" : ""
                 }`}
               >

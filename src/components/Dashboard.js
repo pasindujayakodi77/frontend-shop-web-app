@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserData();
@@ -60,7 +62,11 @@ const Dashboard = () => {
   };
 
   const handleNavigation = (path) => {
-    alert(`Navigation to ${path} - Feature coming soon!`);
+    if (path === "Inventory") {
+      navigate("/inventory");
+    } else {
+      alert(`Navigation to ${path} - Feature coming soon!`);
+    }
   };
 
   // Function to get theme colors based on shop category

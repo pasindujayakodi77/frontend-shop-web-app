@@ -131,7 +131,7 @@ function Expenses() {
       {/* Total Expenses Card */}
       <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg shadow-lg p-6 mb-8">
         <h2 className="text-xl font-semibold mb-2">Total Expenses</h2>
-        <p className="text-4xl font-bold">${totalExpenses.toFixed(2)}</p>
+        <p className="text-4xl font-bold">LKR {totalExpenses.toFixed(2)}</p>
       </div>
 
       {/* Add/Edit Expense Form */}
@@ -157,7 +157,7 @@ function Expenses() {
             </div>
             <div>
               <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                Amount ($)
+                Amount (LKR)
               </label>
               <input
                 type="number"
@@ -255,7 +255,7 @@ function Expenses() {
                       {expense.description}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-600">
-                      ${parseFloat(expense.amount).toFixed(2)}
+                      LKR {parseFloat(expense.amount).toFixed(2)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">

@@ -161,7 +161,7 @@ const Reports = () => {
         labels: Array.from({ length: daysInMonth }, (_, i) => `Day ${i + 1}`),
         datasets: [
           {
-            label: 'Daily Sales ($)',
+            label: 'Daily Sales (LKR)',
             data: dailySales,
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -201,13 +201,13 @@ const Reports = () => {
     
     doc.text(`Total Sales: ${reportData.totalSales || 0}`, 14, yPos);
     yPos += 10;
-    doc.text(`Revenue: $${reportData.revenue?.toFixed(2) || '0.00'}`, 14, yPos);
+    doc.text(`Revenue: LKR ${reportData.revenue?.toFixed(2) || '0.00'}`, 14, yPos);
     yPos += 10;
-    doc.text(`Profit: $${reportData.profit?.toFixed(2) || '0.00'}`, 14, yPos);
+    doc.text(`Profit: LKR ${reportData.profit?.toFixed(2) || '0.00'}`, 14, yPos);
     yPos += 10;
-    doc.text(`Expenses: $${reportData.expenses?.toFixed(2) || '0.00'}`, 14, yPos);
+    doc.text(`Expenses: LKR ${reportData.expenses?.toFixed(2) || '0.00'}`, 14, yPos);
     yPos += 10;
-    doc.text(`Net Profit: $${reportData.netProfit?.toFixed(2) || '0.00'}`, 14, yPos);
+    doc.text(`Net Profit: LKR ${reportData.netProfit?.toFixed(2) || '0.00'}`, 14, yPos);
     
     // Add top products table
     if (reportData.topProducts && reportData.topProducts.length > 0) {
@@ -218,7 +218,7 @@ const Reports = () => {
         index + 1,
         product.name || 'N/A',
         product.quantity || 0,
-        `$${product.revenue?.toFixed(2) || '0.00'}`
+        `LKR ${product.revenue?.toFixed(2) || '0.00'}`
       ]);
       
       doc.autoTable({
@@ -240,10 +240,10 @@ const Reports = () => {
       [],
       ['Metric', 'Value'],
       ['Total Sales', reportData.totalSales || 0],
-      ['Revenue', `$${reportData.revenue?.toFixed(2) || '0.00'}`],
-      ['Profit', `$${reportData.profit?.toFixed(2) || '0.00'}`],
-      ['Expenses', `$${reportData.expenses?.toFixed(2) || '0.00'}`],
-      ['Net Profit', `$${reportData.netProfit?.toFixed(2) || '0.00'}`],
+      ['Revenue', `LKR ${reportData.revenue?.toFixed(2) || '0.00'}`],
+      ['Profit', `LKR ${reportData.profit?.toFixed(2) || '0.00'}`],
+      ['Expenses', `LKR ${reportData.expenses?.toFixed(2) || '0.00'}`],
+      ['Net Profit', `LKR ${reportData.netProfit?.toFixed(2) || '0.00'}`],
       [],
       ['Top Products'],
       ['#', 'Product Name', 'Quantity Sold', 'Revenue']
@@ -256,7 +256,7 @@ const Reports = () => {
           index + 1,
           product.name || 'N/A',
           product.quantity || 0,
-          `$${product.revenue?.toFixed(2) || '0.00'}`
+          `LKR ${product.revenue?.toFixed(2) || '0.00'}`
         ]);
       });
     }
@@ -363,7 +363,7 @@ const Reports = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Revenue</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">
-                  ${reportData?.revenue?.toFixed(2) || '0.00'}
+                  LKR {reportData?.revenue?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="bg-green-100 rounded-full p-3">
@@ -380,7 +380,7 @@ const Reports = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Profit</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">
-                  ${reportData?.profit?.toFixed(2) || '0.00'}
+                  LKR {reportData?.profit?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="bg-yellow-100 rounded-full p-3">
@@ -397,7 +397,7 @@ const Reports = () => {
               <div>
                 <p className="text-gray-600 text-sm font-medium">Expenses</p>
                 <p className="text-3xl font-bold text-gray-800 mt-2">
-                  ${reportData?.expenses?.toFixed(2) || '0.00'}
+                  LKR {reportData?.expenses?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="bg-red-100 rounded-full p-3">
@@ -416,7 +416,7 @@ const Reports = () => {
                 <p className={`text-3xl font-bold mt-2 ${
                   (reportData?.netProfit || 0) >= 0 ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  ${reportData?.netProfit?.toFixed(2) || '0.00'}
+                  LKR {reportData?.netProfit?.toFixed(2) || '0.00'}
                 </p>
               </div>
               <div className="bg-purple-100 rounded-full p-3">
@@ -457,7 +457,7 @@ const Reports = () => {
                     tooltip: {
                       callbacks: {
                         label: function(context) {
-                          return `Sales: $${context.parsed.y.toFixed(2)}`;
+                          return `Sales: LKR ${context.parsed.y.toFixed(2)}`;
                         }
                       }
                     }
@@ -467,12 +467,12 @@ const Reports = () => {
                       beginAtZero: true,
                       ticks: {
                         callback: function(value) {
-                          return '$' + value.toFixed(0);
+                          return 'LKR ' + value.toFixed(0);
                         }
                       },
                       title: {
                         display: true,
-                        text: 'Sales Amount ($)'
+                        text: 'Sales Amount (LKR)'
                       }
                     },
                     x: {
@@ -544,7 +544,7 @@ const Reports = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-semibold text-green-600">
-                          ${product.revenue?.toFixed(2) || '0.00'}
+                          LKR {product.revenue?.toFixed(2) || '0.00'}
                         </div>
                       </td>
                     </tr>

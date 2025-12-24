@@ -168,7 +168,7 @@ const Sales = () => {
   };
 
   const formatCurrency = (amount) => {
-    return `$${amount.toFixed(2)}`;
+    return `LKR ${amount.toFixed(2)}`;
   };
 
   if (loading) {
@@ -241,7 +241,7 @@ const Sales = () => {
                         <option value="">Select a product</option>
                         {products.map((product) => (
                           <option key={product._id || product.id} value={product._id || product.id}>
-                            {product.name} - Stock: {product.quantity} - Price: $
+                            {product.name} - Stock: {product.quantity} - Price: LKR
                             {product.sellingPrice}
                           </option>
                         ))}

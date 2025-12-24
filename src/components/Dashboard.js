@@ -80,7 +80,7 @@ const Dashboard = () => {
         dailySales: {
           labels: dailySalesLabels,
           datasets: [{
-            label: 'Daily Sales ($)',
+            label: 'Daily Sales (LKR)',
             data: dailySalesValues,
             backgroundColor: 'rgba(59, 130, 246, 0.8)',
             borderColor: 'rgba(59, 130, 246, 1)',
@@ -90,7 +90,7 @@ const Dashboard = () => {
         expensesByCategory: expenseCategories.length > 0 ? {
           labels: expenseCategories,
           datasets: [{
-            label: 'Expenses by Category ($)',
+            label: 'Expenses by Category (LKR)',
             data: expenseAmounts,
             backgroundColor: [
               'rgba(239, 68, 68, 0.8)',
@@ -115,14 +115,14 @@ const Dashboard = () => {
           labels: months,
           datasets: [
             {
-              label: 'Revenue ($)',
+              label: 'Revenue (LKR)',
               data: revenueData,
               backgroundColor: 'rgba(34, 197, 94, 0.8)',
               borderColor: 'rgba(34, 197, 94, 1)',
               borderWidth: 1
             },
             {
-              label: 'Expenses ($)',
+              label: 'Expenses (LKR)',
               data: expensesData,
               backgroundColor: 'rgba(239, 68, 68, 0.8)',
               borderColor: 'rgba(239, 68, 68, 1)',
@@ -269,8 +269,8 @@ const Dashboard = () => {
   // Dummy data for stats
   const statsDisplay = [
     { label: "Total Products", value: stats.totalProducts.toString(), icon: "📦", color: "bg-blue-500" },
-    { label: "Total Sales", value: `$${stats.totalRevenue.toFixed(2)}`, icon: "💰", color: "bg-green-500" },
-    { label: "Total Expenses", value: `$${stats.totalExpenses.toFixed(2)}`, icon: "💸", color: "bg-red-500" }
+    { label: "Total Sales", value: `LKR ${stats.totalRevenue.toFixed(2)}`, icon: "💰", color: "bg-green-500" },
+    { label: "Total Expenses", value: `LKR ${stats.totalExpenses.toFixed(2)}`, icon: "💸", color: "bg-red-500" }
   ];
 
   const menuItems = [

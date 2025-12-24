@@ -230,7 +230,7 @@ const Inventory = () => {
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  Cost Price ($)
+                  Cost Price (LKR)
                 </label>
                 <input
                   type="number"
@@ -247,7 +247,7 @@ const Inventory = () => {
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  Selling Price ($)
+                  Selling Price (LKR)
                 </label>
                 <input
                   type="number"
@@ -325,10 +325,10 @@ const Inventory = () => {
                         {product.quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        ${product.costPrice.toFixed(2)}
+                        LKR {product.costPrice.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        ${product.sellingPrice.toFixed(2)}
+                        LKR {product.sellingPrice.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
@@ -362,13 +362,13 @@ const Inventory = () => {
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-gray-600 text-sm">Total Inventory Value (Cost)</p>
               <p className="text-2xl font-bold text-green-600">
-                ${products.reduce((sum, p) => sum + (p.costPrice * p.quantity), 0).toFixed(2)}
+                LKR {products.reduce((sum, p) => sum + (p.costPrice * p.quantity), 0).toFixed(2)}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-md p-4">
               <p className="text-gray-600 text-sm">Total Inventory Value (Selling)</p>
               <p className="text-2xl font-bold text-purple-600">
-                ${products.reduce((sum, p) => sum + (p.sellingPrice * p.quantity), 0).toFixed(2)}
+                LKR {products.reduce((sum, p) => sum + (p.sellingPrice * p.quantity), 0).toFixed(2)}
               </p>
             </div>
           </div>

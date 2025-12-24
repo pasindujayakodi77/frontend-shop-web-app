@@ -6,6 +6,7 @@ import CategorySelection from "./components/CategorySelection";
 import Inventory from "./components/Inventory";
 import Sales from "./components/Sales";
 import Reports from "./components/Reports";
+import Expenses from "./components/Expenses";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -52,6 +53,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/expenses" 
+          element={
+            <ProtectedRoute>
+              <Expenses />
             </ProtectedRoute>
           } 
         />

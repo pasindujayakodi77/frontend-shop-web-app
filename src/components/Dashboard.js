@@ -66,6 +66,8 @@ const Dashboard = () => {
       navigate("/inventory");
     } else if (path === "Sales") {
       navigate("/sales");
+    } else if (path === "Expenses") {
+      navigate("/expenses");
     } else if (path === "Reports") {
       navigate("/reports");
     } else {
@@ -146,6 +148,7 @@ const Dashboard = () => {
   const menuItems = [
     { label: "Inventory", icon: "📦", action: () => handleNavigation("Inventory") },
     { label: "Sales", icon: "💵", action: () => handleNavigation("Sales") },
+    { label: "Expenses", icon: "💸", action: () => handleNavigation("Expenses") },
     { label: "Reports", icon: "📊", action: () => handleNavigation("Reports") },
     { label: "Logout", icon: "🚪", action: handleLogout }
   ];
@@ -203,18 +206,18 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {menuItems.map((item, index) => (
-              <button
-                key={index}
-                onClick={item.action}
-                className={`p-4 rounded-lg border-2 border-gray-200 ${themeColors.lightBorder} ${themeColors.lightHover} transition duration-200 ${
-                  item.label === "Logout" ? "hover:border-red-500 hover:bg-red-50" : ""
-                }`}
-              >
-                <div className="text-4xl mb-2">{item.icon}</div>
-                <div className="font-semibold text-gray-800">{item.label}</div>
-              </button>
-            ))}
+            <button onClick={() => navigate("/inventory")} className="bg-blue-500 text-white p-4 rounded shadow hover:bg-blue-600">
+              Inventory
+            </button>
+            <button onClick={() => navigate("/sales")} className="bg-green-500 text-white p-4 rounded shadow hover:bg-green-600">
+              Sales
+            </button>
+            <button onClick={() => navigate("/expenses")} className="bg-red-500 text-white p-4 rounded shadow hover:bg-red-600">
+              Expenses
+            </button>
+            <button onClick={() => navigate("/reports")} className="bg-purple-500 text-white p-4 rounded shadow hover:bg-purple-600">
+              Reports
+            </button>
           </div>
         </div>
       </main>

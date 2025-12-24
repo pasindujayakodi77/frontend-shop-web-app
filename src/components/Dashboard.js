@@ -64,6 +64,8 @@ const Dashboard = () => {
   const handleNavigation = (path) => {
     if (path === "Inventory") {
       navigate("/inventory");
+    } else if (path === "Sales") {
+      navigate("/sales");
     } else {
       alert(`Navigation to ${path} - Feature coming soon!`);
     }

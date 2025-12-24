@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
 import { clearUserData, getUserData } from '../utils/auth';
+import { dashboardAPI } from '../utils/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,6 +29,11 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalRevenue: 0,
+    totalExpenses: 0
+  });
   const [chartData, setChartData] = useState({
     dailySales: null,
     expensesByCategory: null,
@@ -37,80 +43,99 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchUserData();
-    fetchChartData();
+    fetchDashboardData();
   }, []);
 
-  const fetchChartData = () => {
-    // Generate daily sales data for the current month
-    const currentDate = new Date();
-    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const salesData = days.map(() => Math.floor(Math.random() * 1000) + 200);
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch all dashboard data in parallel
+      const [statsData, dailySalesData, expensesCategoryData, revenueExpensesData] = await Promise.all([
+        dashboardAPI.getStats(),
+        dashboardAPI.getDailySales(),
+        dashboardAPI.getExpensesByCategory(),
+        dashboardAPI.getRevenueVsExpenses()
+      ]);
 
-    // Generate expenses by category data
-    const expenseCategories = ['Rent', 'Utilities', 'Inventory', 'Salaries', 'Marketing', 'Other'];
-    const expensesData = expenseCategories.map(() => Math.floor(Math.random() * 3000) + 500);
+      // Update stats
+      setStats({
+        totalProducts: statsData.totalProducts,
+        totalRevenue: statsData.totalRevenue,
+        totalExpenses: statsData.totalExpenses
+      });
 
-    // Generate revenue vs expenses comparison
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const revenueData = months.map(() => Math.floor(Math.random() * 15000) + 8000);
-    const expensesMonthly = months.map(() => Math.floor(Math.random() * 10000) + 4000);
+      // Process daily sales data
+      const dailySalesLabels = dailySalesData.map(d => `Day ${d.day}`);
+      const dailySalesValues = dailySalesData.map(d => d.revenue);
 
-    setChartData({
-      dailySales: {
-        labels: days.map(d => `Day ${d}`),
-        datasets: [{
-          label: 'Daily Sales ($)',
-          data: salesData,
-          backgroundColor: 'rgba(59, 130, 246, 0.8)',
-          borderColor: 'rgba(59, 130, 246, 1)',
-          borderWidth: 1
-        }]
-      },
-      expensesByCategory: {
-        labels: expenseCategories,
-        datasets: [{
-          label: 'Expenses by Category ($)',
-          data: expensesData,
-          backgroundColor: [
-            'rgba(239, 68, 68, 0.8)',
-            'rgba(249, 115, 22, 0.8)',
-            'rgba(234, 179, 8, 0.8)',
-            'rgba(34, 197, 94, 0.8)',
-            'rgba(59, 130, 246, 0.8)',
-            'rgba(168, 85, 247, 0.8)'
-          ],
-          borderColor: [
-            'rgba(239, 68, 68, 1)',
-            'rgba(249, 115, 22, 1)',
-            'rgba(234, 179, 8, 1)',
-            'rgba(34, 197, 94, 1)',
-            'rgba(59, 130, 246, 1)',
-            'rgba(168, 85, 247, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      revenueVsExpenses: {
-        labels: months,
-        datasets: [
-          {
-            label: 'Revenue ($)',
-            data: revenueData,
-            backgroundColor: 'rgba(34, 197, 94, 0.8)',
-            borderColor: 'rgba(34, 197, 94, 1)',
+      // Process expenses by category
+      const expenseCategories = expensesCategoryData.map(e => e.category);
+      const expenseAmounts = expensesCategoryData.map(e => e.amount);
+
+      // Process revenue vs expenses
+      const months = revenueExpensesData.map(m => m.month);
+      const revenueData = revenueExpensesData.map(m => m.revenue);
+      const expensesData = revenueExpensesData.map(m => m.expenses);
+
+      setChartData({
+        dailySales: {
+          labels: dailySalesLabels,
+          datasets: [{
+            label: 'Daily Sales ($)',
+            data: dailySalesValues,
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 1
-          },
-          {
-            label: 'Expenses ($)',
-            data: expensesMonthly,
-            backgroundColor: 'rgba(239, 68, 68, 0.8)',
-            borderColor: 'rgba(239, 68, 68, 1)',
+          }]
+        },
+        expensesByCategory: expenseCategories.length > 0 ? {
+          labels: expenseCategories,
+          datasets: [{
+            label: 'Expenses by Category ($)',
+            data: expenseAmounts,
+            backgroundColor: [
+              'rgba(239, 68, 68, 0.8)',
+              'rgba(249, 115, 22, 0.8)',
+              'rgba(234, 179, 8, 0.8)',
+              'rgba(34, 197, 94, 0.8)',
+              'rgba(59, 130, 246, 0.8)',
+              'rgba(168, 85, 247, 0.8)'
+            ],
+            borderColor: [
+              'rgba(239, 68, 68, 1)',
+              'rgba(249, 115, 22, 1)',
+              'rgba(234, 179, 8, 1)',
+              'rgba(34, 197, 94, 1)',
+              'rgba(59, 130, 246, 1)',
+              'rgba(168, 85, 247, 1)'
+            ],
             borderWidth: 1
-          }
-        ]
-      }
-    });
+          }]
+        } : null,
+        revenueVsExpenses: {
+          labels: months,
+          datasets: [
+            {
+              label: 'Revenue ($)',
+              data: revenueData,
+              backgroundColor: 'rgba(34, 197, 94, 0.8)',
+              borderColor: 'rgba(34, 197, 94, 1)',
+              borderWidth: 1
+            },
+            {
+              label: 'Expenses ($)',
+              data: expensesData,
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderColor: 'rgba(239, 68, 68, 1)',
+              borderWidth: 1
+            }
+          ]
+        }
+      });
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      // Don't set error state here, just log it
+      // Dashboard can still be shown with empty data
+    }
   };
 
   const fetchUserData = async () => {
@@ -242,10 +267,10 @@ const Dashboard = () => {
   }
 
   // Dummy data for stats
-  const stats = [
-    { label: "Total Products", value: "124", icon: "📦", color: "bg-blue-500" },
-    { label: "Total Sales", value: "$12,450", icon: "💰", color: "bg-green-500" },
-    { label: "Total Expenses", value: "$8,230", icon: "💸", color: "bg-red-500" }
+  const statsDisplay = [
+    { label: "Total Products", value: stats.totalProducts.toString(), icon: "📦", color: "bg-blue-500" },
+    { label: "Total Sales", value: `$${stats.totalRevenue.toFixed(2)}`, icon: "💰", color: "bg-green-500" },
+    { label: "Total Expenses", value: `$${stats.totalExpenses.toFixed(2)}`, icon: "💸", color: "bg-red-500" }
   ];
 
   const menuItems = [
@@ -287,7 +312,7 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {stats.map((stat, index) => (
+          {statsDisplay.map((stat, index) => (
             <div
               key={index}
               className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200"
@@ -362,7 +387,7 @@ const Dashboard = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
               <div className="h-80 flex items-center justify-center">
-                {chartData.expensesByCategory && (
+                {chartData.expensesByCategory ? (
                   <Pie 
                     data={chartData.expensesByCategory}
                     options={{
@@ -379,6 +404,8 @@ const Dashboard = () => {
                       }
                     }}
                   />
+                ) : (
+                  <p className="text-gray-500">No expense data available</p>
                 )}
               </div>
             </div>

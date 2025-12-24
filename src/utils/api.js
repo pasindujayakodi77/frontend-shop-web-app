@@ -180,4 +180,51 @@ export const productsAPI = {
   }
 };
 
+// ===== DASHBOARD API =====
+export const dashboardAPI = {
+  // Get dashboard statistics
+  getStats: async () => {
+    try {
+      const response = await axiosInstance.get('/dashboard/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      throw error;
+    }
+  },
+
+  // Get daily sales data for current month
+  getDailySales: async () => {
+    try {
+      const response = await axiosInstance.get('/dashboard/daily-sales');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching daily sales:', error);
+      throw error;
+    }
+  },
+
+  // Get expenses by category
+  getExpensesByCategory: async () => {
+    try {
+      const response = await axiosInstance.get('/dashboard/expenses-by-category');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching expenses by category:', error);
+      throw error;
+    }
+  },
+
+  // Get revenue vs expenses comparison
+  getRevenueVsExpenses: async () => {
+    try {
+      const response = await axiosInstance.get('/dashboard/revenue-vs-expenses');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching revenue vs expenses:', error);
+      throw error;
+    }
+  }
+};
+
 export default axiosInstance;

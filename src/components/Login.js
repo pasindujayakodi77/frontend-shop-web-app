@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// Use environment variable for API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
@@ -9,8 +12,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const response = await axios.post(`${API_URL}/auth/login`, formData);
       localStorage.setItem("token", response.data.token);
+      
+      // Store userId for user-specific data
+      if (response.data.user?.id || response.data.userId) {
+        const userId = response.data.user?.id || response.data.userId;
+        localStorage.setItem("userId", userId);
+      }
+      
       alert(response.data.message);
       
       // Check if user has selected a category

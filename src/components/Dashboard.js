@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
+import { clearUserData, getUserData } from '../utils/auth';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -139,9 +140,9 @@ const Dashboard = () => {
 
       const data = await response.json();
       
-      // If category is not in API response, check localStorage
+      // If category is not in API response, check user-specific localStorage
       if (!data.category || !data.shopCategory) {
-        const localCategory = localStorage.getItem("userCategory");
+        const localCategory = getUserData("userCategory");
         if (localCategory) {
           data.category = localCategory;
           data.shopCategory = localCategory;
@@ -157,6 +158,7 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
+    clearUserData();
     localStorage.removeItem("token");
     alert("Logged out successfully.");
     window.location.href = "/login";

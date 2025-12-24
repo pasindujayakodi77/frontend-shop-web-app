@@ -1,29 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { clearUserData } from '../utils/auth';
+import { salesAPI, productsAPI } from '../utils/api';
 
 const Sales = () => {
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([{ productId: "", quantity: "" }]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load sales and products from localStorage on mount
-    const savedSales = localStorage.getItem("sales");
-    if (savedSales) {
-      setSales(JSON.parse(savedSales));
-    }
-
-    const savedProducts = localStorage.getItem("products");
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    }
+    // Load sales and products from backend API
+    fetchSalesAndProducts();
   }, []);
 
-  const saveSales = (updatedSales) => {
-    localStorage.setItem("sales", JSON.stringify(updatedSales));
-    setSales(updatedSales);
+  const fetchSalesAndProducts = async () => {
+    try {
+      setLoading(true);
+      const [salesData, productsData] = await Promise.all([
+        salesAPI.getAll(),
+        productsAPI.getAll()
+      ]);
+      setSales(Array.isArray(salesData) ? salesData : []);
+      // Backend returns {products: [...]} so extract the products array
+      const productsArray = productsData.products || productsData;
+      setProducts(Array.isArray(productsArray) ? productsArray : []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setSales([]);
+      setProducts([]);
+      alert('Failed to load data. Please make sure you are logged in and the backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddProductRow = () => {
@@ -46,7 +57,7 @@ const Sales = () => {
     let totalProfit = 0;
 
     saleProducts.forEach((sp) => {
-      const product = products.find((p) => p.id === parseInt(sp.productId));
+      const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
       if (product) {
         const quantity = parseInt(sp.quantity);
         const revenue = product.sellingPrice * quantity;
@@ -59,7 +70,7 @@ const Sales = () => {
     return { totalRevenue, totalProfit };
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate that at least one product is selected
@@ -75,7 +86,7 @@ const Sales = () => {
     // Check if sufficient inventory is available
     let insufficientStock = false;
     validProducts.forEach((sp) => {
-      const product = products.find((p) => p.id === parseInt(sp.productId));
+      const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
       if (product && product.quantity < parseInt(sp.quantity)) {
         alert(`Insufficient stock for ${product.name}. Available: ${product.quantity}`);
         insufficientStock = true;
@@ -91,7 +102,7 @@ const Sales = () => {
 
     // Create sale record with product details
     const saleProducts = validProducts.map((sp) => {
-      const product = products.find((p) => p.id === parseInt(sp.productId));
+      const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
       return {
         productId: sp.productId,
         productName: product.name,
@@ -102,38 +113,36 @@ const Sales = () => {
     });
 
     const newSale = {
-      id: Date.now(),
       date: new Date().toISOString(),
       products: saleProducts,
       totalRevenue,
       totalProfit
     };
 
-    // Update inventory by reducing quantities
-    const updatedProducts = products.map((product) => {
-      const soldProduct = validProducts.find(
-        (sp) => parseInt(sp.productId) === product.id
-      );
-      if (soldProduct) {
-        return {
-          ...product,
-          quantity: product.quantity - parseInt(soldProduct.quantity)
-        };
+    try {
+      // Save new sale to backend
+      const createdSale = await salesAPI.create(newSale);
+      
+      // Update inventory quantities on backend
+      for (const sp of validProducts) {
+        const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
+        if (product) {
+          const updatedQuantity = product.quantity - parseInt(sp.quantity);
+          await productsAPI.update(product._id, { quantity: updatedQuantity });
+        }
       }
-      return product;
-    });
 
-    // Save updated products to localStorage
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-    setProducts(updatedProducts);
+      // Refresh data from backend
+      await fetchSalesAndProducts();
 
-    // Save new sale
-    saveSales([newSale, ...sales]);
-
-    // Reset form
-    setSelectedProducts([{ productId: "", quantity: "" }]);
-    setShowForm(false);
-    alert("Sale recorded successfully!");
+      // Reset form
+      setSelectedProducts([{ productId: "", quantity: "" }]);
+      setShowForm(false);
+      alert("Sale recorded successfully!");
+    } catch (error) {
+      console.error('Error recording sale:', error);
+      alert('Failed to record sale. Please try again.');
+    }
   };
 
   const handleCancel = () => {
@@ -142,6 +151,7 @@ const Sales = () => {
   };
 
   const handleLogout = () => {
+    clearUserData();
     localStorage.removeItem("token");
     navigate("/login");
   };
@@ -160,6 +170,17 @@ const Sales = () => {
   const formatCurrency = (amount) => {
     return `$${amount.toFixed(2)}`;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -219,7 +240,7 @@ const Sales = () => {
                       >
                         <option value="">Select a product</option>
                         {products.map((product) => (
-                          <option key={product.id} value={product.id}>
+                          <option key={product._id || product.id} value={product._id || product.id}>
                             {product.name} - Stock: {product.quantity} - Price: $
                             {product.sellingPrice}
                           </option>

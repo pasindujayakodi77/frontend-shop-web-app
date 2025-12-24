@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { setUserData } from '../utils/auth';
 
 const CategorySelection = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -44,15 +45,15 @@ const CategorySelection = () => {
         );
 
         if (response.data) {
-          // Store category locally
-          localStorage.setItem('userCategory', category);
+          // Store category in user-specific localStorage
+          setUserData('userCategory', category);
           navigate('/dashboard');
         }
       } catch (err) {
         // If endpoint doesn't exist (404), store locally and continue
         if (err.response?.status === 404 || err.response?.data?.error?.includes('Cannot')) {
           console.warn('Backend endpoint not available. Storing category locally.');
-          localStorage.setItem('userCategory', category);
+          setUserData('userCategory', category);
           navigate('/dashboard');
         } else if (err.response?.status === 401 || err.response?.status === 403 || err.response?.data?.error?.includes('access denied')) {
           // Authentication error - redirect to login

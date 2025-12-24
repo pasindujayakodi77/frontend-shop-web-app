@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { productsAPI } from '../utils/api';
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -15,16 +17,24 @@ const Inventory = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load products from localStorage on mount
-    const savedProducts = localStorage.getItem("products");
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    }
+    // Load products from backend API on mount
+    fetchProducts();
   }, []);
 
-  const saveProducts = (updatedProducts) => {
-    localStorage.setItem("products", JSON.stringify(updatedProducts));
-    setProducts(updatedProducts);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await productsAPI.getAll();
+      // Backend returns {products: [...]} so extract the products array
+      const productsArray = data.products || data;
+      setProducts(Array.isArray(productsArray) ? productsArray : []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+      alert('Failed to load products. Please make sure you are logged in and the backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -32,39 +42,56 @@ const Inventory = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (editingProduct) {
-      // Update existing product
-      const updatedProducts = products.map((product) =>
-        product.id === editingProduct.id
-          ? { ...formData, id: editingProduct.id }
-          : product
-      );
-      saveProducts(updatedProducts);
-      setEditingProduct(null);
-    } else {
-      // Add new product
-      const newProduct = {
-        ...formData,
-        id: Date.now(),
-        quantity: parseInt(formData.quantity),
-        costPrice: parseFloat(formData.costPrice),
-        sellingPrice: parseFloat(formData.sellingPrice)
-      };
-      saveProducts([...products, newProduct]);
-    }
+    const productData = {
+      name: formData.name,
+      category: formData.category,
+      quantity: parseInt(formData.quantity),
+      costPrice: parseFloat(formData.costPrice),
+      sellingPrice: parseFloat(formData.sellingPrice)
+    };
 
-    // Reset form
-    setFormData({
-      name: "",
-      category: "",
-      quantity: "",
-      costPrice: "",
-      sellingPrice: ""
-    });
-    setShowForm(false);
+    try {
+      if (editingProduct) {
+        // Update existing product
+        await productsAPI.update(editingProduct._id || editingProduct.id, productData);
+        setEditingProduct(null);
+      } else {
+        // Add new product
+        await productsAPI.create(productData);
+      }
+
+      // Refresh products from backend
+      await fetchProducts();
+
+      // Reset form
+      setFormData({
+        name: "",
+        category: "",
+        quantity: "",
+        costPrice: "",
+        sellingPrice: ""
+      });
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      let errorMessage = 'Failed to save product. ';
+      
+      if (error.response) {
+        // Server responded with error
+        errorMessage += error.response.data.message || error.response.data.error || `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // Request made but no response
+        errorMessage += 'Cannot reach server. Please check your connection and ensure the backend is running.';
+      } else {
+        // Error in request setup
+        errorMessage += error.message;
+      }
+      
+      alert(errorMessage);
+    }
   };
 
   const handleEdit = (product) => {
@@ -79,10 +106,15 @@ const Inventory = () => {
     setShowForm(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      const updatedProducts = products.filter((product) => product.id !== id);
-      saveProducts(updatedProducts);
+      try {
+        await productsAPI.delete(id);
+        await fetchProducts();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product. Please try again.');
+      }
     }
   };
 
@@ -101,6 +133,17 @@ const Inventory = () => {
   const handleBackToDashboard = () => {
     navigate("/dashboard");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -271,7 +314,7 @@ const Inventory = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
+                    <tr key={product._id || product.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {product.name}
                       </td>
@@ -295,7 +338,7 @@ const Inventory = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product._id || product.id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete

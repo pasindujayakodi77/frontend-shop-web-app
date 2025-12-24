@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { Line } from 'react-chartjs-2';
+import { salesAPI, productsAPI, expensesAPI } from '../utils/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,17 +38,22 @@ const Reports = () => {
     fetchMonthlySummary();
   }, []);
 
-  const fetchMonthlySummary = () => {
+  const fetchMonthlySummary = async () => {
     try {
       setLoading(true);
       
-      // Get sales data from localStorage
-      const savedSales = localStorage.getItem("sales");
-      const sales = savedSales ? JSON.parse(savedSales) : [];
-      
-      // Get products data from localStorage
-      const savedProducts = localStorage.getItem("products");
-      const products = savedProducts ? JSON.parse(savedProducts) : [];
+      // Fetch data from backend API
+      const [salesData, productsData, expensesData] = await Promise.all([
+        salesAPI.getAll(),
+        productsAPI.getAll(),
+        expensesAPI.getAll()
+      ]);
+
+      // Extract arrays from API responses
+      const sales = Array.isArray(salesData) ? salesData : [];
+      const productsResponse = productsData.products || productsData;
+      const products = Array.isArray(productsResponse) ? productsResponse : [];
+      const expenses = Array.isArray(expensesData) ? expensesData : [];
 
       // Calculate current month's data
       const now = new Date();
@@ -64,17 +70,17 @@ const Reports = () => {
       let totalSales = monthlySales.length;
       let revenue = 0;
       let profit = 0;
-      let expenses = 0;
+      let costOfGoodsSold = 0;
       const productSalesMap = {};
 
       monthlySales.forEach(sale => {
         revenue += sale.totalRevenue || 0;
         profit += sale.totalProfit || 0;
         
-        // Calculate expenses (cost of goods sold)
+        // Calculate cost of goods sold
         if (sale.products) {
           sale.products.forEach(product => {
-            expenses += (product.costPrice || 0) * (product.quantity || 0);
+            costOfGoodsSold += (product.costPrice || 0) * (product.quantity || 0);
             
             // Track product sales
             const productId = product.productId;
@@ -92,18 +98,30 @@ const Reports = () => {
         }
       });
 
+      // Calculate monthly expenses from expenses API
+      const monthlyExpenses = expenses.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        return expenseDate.getMonth() === currentMonth && 
+               expenseDate.getFullYear() === currentYear;
+      });
+
+      const totalExpenses = monthlyExpenses.reduce((sum, expense) => 
+        sum + (expense.amount || 0), 0
+      );
+
       // Get top products
       const topProducts = Object.values(productSalesMap)
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10);
 
-      const netProfit = profit;
+      // Net profit = profit from sales - other expenses
+      const netProfit = profit - totalExpenses;
 
       const data = {
         totalSales,
         revenue,
         profit,
-        expenses,
+        expenses: totalExpenses + costOfGoodsSold,
         netProfit,
         topProducts
       };
@@ -112,7 +130,8 @@ const Reports = () => {
       generateDailySalesChart(sales);
       setError(null);
     } catch (err) {
-      setError(err.message || 'Failed to load report data');
+      console.error('Error fetching report data:', err);
+      setError(err.message || 'Failed to load report data. Please make sure you are logged in and the backend is running.');
     } finally {
       setLoading(false);
     }

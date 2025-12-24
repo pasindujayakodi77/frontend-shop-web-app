@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+// Use environment variable for API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 const Signup = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "", shopCategory: "" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      const response = await axios.post(`${API_URL}/auth/signup`, formData);
       alert("Sign-Up Successful: " + response.data.message);
     } catch (err) {
       alert("Sign-Up Failed: " + err.response.data.error);

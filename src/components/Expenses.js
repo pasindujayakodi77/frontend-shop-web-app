@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { expensesAPI } from '../utils/api';
 
 function Expenses() {
   const [expenses, setExpenses] = useState([]);
@@ -8,23 +9,26 @@ function Expenses() {
     category: ''
   });
   const [editingId, setEditingId] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Load expenses from localStorage on mount
+  // Load expenses from backend API on mount
   useEffect(() => {
-    const savedExpenses = localStorage.getItem('expenses');
-    if (savedExpenses) {
-      setExpenses(JSON.parse(savedExpenses));
-    }
-    setIsLoaded(true);
+    fetchExpenses();
   }, []);
 
-  // Save expenses to localStorage whenever they change (but not on initial load)
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('expenses', JSON.stringify(expenses));
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      const data = await expensesAPI.getAll();
+      setExpenses(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      setExpenses([]);
+      alert('Failed to load expenses. Please make sure you are logged in and the backend is running.');
+    } finally {
+      setLoading(false);
     }
-  }, [expenses, isLoaded]);
+  };
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
@@ -39,7 +43,7 @@ function Expenses() {
   };
 
   // Handle form submission (Add or Update)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.description || !formData.amount || !formData.category) {
@@ -47,30 +51,33 @@ function Expenses() {
       return;
     }
 
-    if (editingId !== null) {
-      // Update existing expense
-      setExpenses(expenses.map(expense => 
-        expense.id === editingId 
-          ? { ...expense, ...formData }
-          : expense
-      ));
-      setEditingId(null);
-    } else {
-      // Add new expense
-      const newExpense = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString(),
-        ...formData
-      };
-      setExpenses([...expenses, newExpense]);
-    }
+    try {
+      if (editingId !== null) {
+        // Update existing expense
+        await expensesAPI.update(editingId, formData);
+        setEditingId(null);
+      } else {
+        // Add new expense
+        const newExpense = {
+          date: new Date().toLocaleDateString(),
+          ...formData
+        };
+        await expensesAPI.create(newExpense);
+      }
 
-    // Reset form
-    setFormData({
-      description: '',
-      amount: '',
-      category: ''
-    });
+      // Refresh expenses from backend
+      await fetchExpenses();
+
+      // Reset form
+      setFormData({
+        description: '',
+        amount: '',
+        category: ''
+      });
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      alert('Failed to save expense. Please try again.');
+    }
   };
 
   // Handle edit
@@ -80,13 +87,19 @@ function Expenses() {
       amount: expense.amount,
       category: expense.category
     });
-    setEditingId(expense.id);
+    setEditingId(expense._id || expense.id);
   };
 
   // Handle delete
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
-      setExpenses(expenses.filter(expense => expense.id !== id));
+      try {
+        await expensesAPI.delete(id);
+        await fetchExpenses();
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+        alert('Failed to delete expense. Please try again.');
+      }
     }
   };
 
@@ -99,6 +112,17 @@ function Expenses() {
       category: ''
     });
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading expenses...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -223,7 +247,7 @@ function Expenses() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {expenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-gray-50 transition duration-150">
+                  <tr key={expense._id || expense.id} className="hover:bg-gray-50 transition duration-150">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {expense.date}
                     </td>
@@ -244,6 +268,12 @@ function Expenses() {
                         className="text-blue-600 hover:text-blue-900 transition duration-150"
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(expense._id || expense.id)}
+                        className="text-red-600 hover:text-red-900 transition duration-150"
+                      >
+                        Delete
                       </button>
                       <button
                         onClick={() => handleDelete(expense.id)}

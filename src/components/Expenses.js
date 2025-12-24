@@ -8,6 +8,7 @@ function Expenses() {
     category: ''
   });
   const [editingId, setEditingId] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load expenses from localStorage on mount
   useEffect(() => {
@@ -15,12 +16,15 @@ function Expenses() {
     if (savedExpenses) {
       setExpenses(JSON.parse(savedExpenses));
     }
+    setIsLoaded(true);
   }, []);
 
-  // Save expenses to localStorage whenever they change
+  // Save expenses to localStorage whenever they change (but not on initial load)
   useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-  }, [expenses]);
+    if (isLoaded) {
+      localStorage.setItem('expenses', JSON.stringify(expenses));
+    }
+  }, [expenses, isLoaded]);
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);

@@ -2,11 +2,36 @@ import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const Reports = () => {
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dailySalesChart, setDailySalesChart] = useState(null);
 
   useEffect(() => {
     fetchMonthlySummary();
@@ -84,11 +109,57 @@ const Reports = () => {
       };
 
       setReportData(data);
+      generateDailySalesChart(sales);
       setError(null);
     } catch (err) {
       setError(err.message || 'Failed to load report data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateDailySalesChart = (sales) => {
+    try {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      // Initialize daily sales array
+      const dailySales = Array(daysInMonth).fill(0);
+
+      // Calculate sales for each day
+      sales.forEach(sale => {
+        const saleDate = new Date(sale.date);
+        if (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear) {
+          const day = saleDate.getDate() - 1; // 0-indexed
+          dailySales[day] += sale.totalRevenue || 0;
+        }
+      });
+
+      // Create chart data
+      const chartData = {
+        labels: Array.from({ length: daysInMonth }, (_, i) => `Day ${i + 1}`),
+        datasets: [
+          {
+            label: 'Daily Sales ($)',
+            data: dailySales,
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+          }
+        ]
+      };
+
+      setDailySalesChart(chartData);
+    } catch (err) {
+      console.error('Error generating chart:', err);
     }
   };
 
@@ -336,6 +407,75 @@ const Reports = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Daily Sales Trend Chart */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Daily Sales Trend - Current Month</h2>
+          {dailySalesChart ? (
+            <div className="h-96">
+              <Line
+                data={dailySalesChart}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'top',
+                      labels: {
+                        font: {
+                          size: 14
+                        }
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: 'Sales Performance Over Time',
+                      font: {
+                        size: 16
+                      }
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          return `Sales: $${context.parsed.y.toFixed(2)}`;
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value) {
+                          return '$' + value.toFixed(0);
+                        }
+                      },
+                      title: {
+                        display: true,
+                        text: 'Sales Amount ($)'
+                      }
+                    },
+                    x: {
+                      title: {
+                        display: true,
+                        text: 'Day of Month'
+                      }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-96">
+              <div className="text-center">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p className="text-gray-600">Loading chart data...</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Top Products */}

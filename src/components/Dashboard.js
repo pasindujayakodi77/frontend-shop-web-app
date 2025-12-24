@@ -1,15 +1,116 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Bar, Pie } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [chartData, setChartData] = useState({
+    dailySales: null,
+    expensesByCategory: null,
+    revenueVsExpenses: null
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserData();
+    fetchChartData();
   }, []);
+
+  const fetchChartData = () => {
+    // Generate daily sales data for the current month
+    const currentDate = new Date();
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    const salesData = days.map(() => Math.floor(Math.random() * 1000) + 200);
+
+    // Generate expenses by category data
+    const expenseCategories = ['Rent', 'Utilities', 'Inventory', 'Salaries', 'Marketing', 'Other'];
+    const expensesData = expenseCategories.map(() => Math.floor(Math.random() * 3000) + 500);
+
+    // Generate revenue vs expenses comparison
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const revenueData = months.map(() => Math.floor(Math.random() * 15000) + 8000);
+    const expensesMonthly = months.map(() => Math.floor(Math.random() * 10000) + 4000);
+
+    setChartData({
+      dailySales: {
+        labels: days.map(d => `Day ${d}`),
+        datasets: [{
+          label: 'Daily Sales ($)',
+          data: salesData,
+          backgroundColor: 'rgba(59, 130, 246, 0.8)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1
+        }]
+      },
+      expensesByCategory: {
+        labels: expenseCategories,
+        datasets: [{
+          label: 'Expenses by Category ($)',
+          data: expensesData,
+          backgroundColor: [
+            'rgba(239, 68, 68, 0.8)',
+            'rgba(249, 115, 22, 0.8)',
+            'rgba(234, 179, 8, 0.8)',
+            'rgba(34, 197, 94, 0.8)',
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(168, 85, 247, 0.8)'
+          ],
+          borderColor: [
+            'rgba(239, 68, 68, 1)',
+            'rgba(249, 115, 22, 1)',
+            'rgba(234, 179, 8, 1)',
+            'rgba(34, 197, 94, 1)',
+            'rgba(59, 130, 246, 1)',
+            'rgba(168, 85, 247, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      revenueVsExpenses: {
+        labels: months,
+        datasets: [
+          {
+            label: 'Revenue ($)',
+            data: revenueData,
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            borderColor: 'rgba(34, 197, 94, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Expenses ($)',
+            data: expensesMonthly,
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderColor: 'rgba(239, 68, 68, 1)',
+            borderWidth: 1
+          }
+        ]
+      }
+    });
+  };
 
   const fetchUserData = async () => {
     try {
@@ -218,6 +319,97 @@ const Dashboard = () => {
             <button onClick={() => navigate("/reports")} className="bg-purple-500 text-white p-4 rounded shadow hover:bg-purple-600">
               Reports
             </button>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="mt-8 space-y-8">
+          {/* Daily Sales Chart */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Daily Sales - Current Month</h3>
+            <div className="h-80">
+              {chartData.dailySales && (
+                <Bar 
+                  data={chartData.dailySales}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'top',
+                      },
+                      title: {
+                        display: true,
+                        text: 'Daily Sales Overview'
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: true
+                      }
+                    }
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Expenses by Category and Revenue vs Expenses */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Expenses by Category Pie Chart */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
+              <div className="h-80 flex items-center justify-center">
+                {chartData.expensesByCategory && (
+                  <Pie 
+                    data={chartData.expensesByCategory}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                        },
+                        title: {
+                          display: true,
+                          text: 'Expense Distribution'
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Revenue vs Expenses Bar Chart */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Revenue vs Expenses</h3>
+              <div className="h-80">
+                {chartData.revenueVsExpenses && (
+                  <Bar 
+                    data={chartData.revenueVsExpenses}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                        },
+                        title: {
+                          display: true,
+                          text: 'Monthly Comparison'
+                        }
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </main>

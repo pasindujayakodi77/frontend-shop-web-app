@@ -66,6 +66,8 @@ const Dashboard = () => {
       navigate("/inventory");
     } else if (path === "Sales") {
       navigate("/sales");
+    } else if (path === "Reports") {
+      navigate("/reports");
     } else {
       alert(`Navigation to ${path} - Feature coming soon!`);
     }

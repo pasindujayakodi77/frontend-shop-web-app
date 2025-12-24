@@ -5,6 +5,7 @@ import Dashboard from "./components/Dashboard";
 import CategorySelection from "./components/CategorySelection";
 import Inventory from "./components/Inventory";
 import Sales from "./components/Sales";
+import Reports from "./components/Reports";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -43,6 +44,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Sales />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/reports" 
+          element={
+            <ProtectedRoute>
+              <Reports />
             </ProtectedRoute>
           } 
         />

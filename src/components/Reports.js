@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Line } from "react-chartjs-2";
 import { clearUserData } from "../utils/auth";
@@ -184,7 +184,7 @@ const Reports = () => {
         formatCurrency(product.revenue),
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: yPos + 5,
         head: [["#", "Product Name", "Quantity Sold", "Revenue"]],
         body: tableData,

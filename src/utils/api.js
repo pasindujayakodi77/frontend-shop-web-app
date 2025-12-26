@@ -62,6 +62,17 @@ export const salesAPI = {
     }
   },
 
+  // Update a sale
+  update: async (saleId, saleData) => {
+    try {
+      const response = await axiosInstance.put(`/sales/${saleId}`, saleData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating sale:', error);
+      throw error;
+    }
+  },
+
   // Delete a sale
   delete: async (saleId) => {
     try {

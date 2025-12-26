@@ -8,6 +8,7 @@ const Sales = () => {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([{ productId: "", quantity: "" }]);
+  const [editSaleId, setEditSaleId] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -120,28 +121,59 @@ const Sales = () => {
     };
 
     try {
-      // Save new sale to backend
-      const createdSale = await salesAPI.create(newSale);
-      
-      // Update inventory quantities on backend
-      for (const sp of validProducts) {
-        const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
-        if (product) {
-          const updatedQuantity = product.quantity - parseInt(sp.quantity);
-          await productsAPI.update(product._id, { quantity: updatedQuantity });
+      if (editSaleId) {
+        // Update existing sale
+        await salesAPI.update(editSaleId, newSale);
+        // Do not attempt inventory reconciliation here
+        await fetchSalesAndProducts();
+        setEditSaleId(null);
+        setSelectedProducts([{ productId: "", quantity: "" }]);
+        setShowForm(false);
+        alert("Sale updated successfully!");
+      } else {
+        // Save new sale to backend
+        await salesAPI.create(newSale);
+
+        // Update inventory quantities on backend
+        for (const sp of validProducts) {
+          const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
+          if (product) {
+            const updatedQuantity = product.quantity - parseInt(sp.quantity);
+            await productsAPI.update(product._id, { quantity: updatedQuantity });
+          }
         }
+
+        // Refresh data from backend
+        await fetchSalesAndProducts();
+
+        // Reset form
+        setSelectedProducts([{ productId: "", quantity: "" }]);
+        setShowForm(false);
+        alert("Sale recorded successfully!");
       }
-
-      // Refresh data from backend
-      await fetchSalesAndProducts();
-
-      // Reset form
-      setSelectedProducts([{ productId: "", quantity: "" }]);
-      setShowForm(false);
-      alert("Sale recorded successfully!");
     } catch (error) {
       console.error('Error recording sale:', error);
       alert('Failed to record sale. Please try again.');
+    }
+  };
+
+  const handleEdit = (sale) => {
+    // Populate form with sale data for editing
+    const rows = (sale.products || []).map((p) => ({ productId: p.productId, quantity: p.quantity }));
+    setSelectedProducts(rows.length > 0 ? rows : [{ productId: "", quantity: "" }]);
+    setEditSaleId(sale._id || sale.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (saleId) => {
+    if (!window.confirm('Are you sure you want to delete this sale?')) return;
+    try {
+      await salesAPI.delete(saleId);
+      await fetchSalesAndProducts();
+      alert('Sale deleted');
+    } catch (err) {
+      console.error('Error deleting sale:', err);
+      alert('Failed to delete sale');
     }
   };
 
@@ -334,11 +366,14 @@ const Sales = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Total Profit
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {sales.map((sale) => (
-                    <tr key={sale.id} className="hover:bg-gray-50">
+                    <tr key={sale._id || sale.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(sale.date)}
                       </td>
@@ -356,6 +391,22 @@ const Sales = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                         {formatCurrency(sale.totalProfit)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(sale)}
+                            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(sale._id || sale.id)}
+                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

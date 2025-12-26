@@ -275,12 +275,7 @@ function Expenses() {
                       >
                         Delete
                       </button>
-                      <button
-                        onClick={() => handleDelete(expense.id)}
-                        className="text-red-600 hover:text-red-900 transition duration-150"
-                      >
-                        Delete
-                      </button>
+                      
                     </td>
                   </tr>
                 ))}

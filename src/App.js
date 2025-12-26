@@ -8,6 +8,8 @@ import Sales from "./components/Sales";
 import Reports from "./components/Reports";
 import Expenses from "./components/Expenses";
 import ProtectedRoute from "./components/ProtectedRoute";
+import OAuthHandler from "./components/OAuthHandler";
+import SocialEmail from "./components/SocialEmail";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/oauth/callback" element={<OAuthHandler />} />
+        <Route path="/social-email" element={<SocialEmail />} />
         <Route 
           path="/select-category" 
           element={

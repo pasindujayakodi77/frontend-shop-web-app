@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 // Use environment variable for API URL
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
@@ -9,6 +9,26 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [status, setStatus] = useState({ loading: false, error: "" });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Surface OAuth errors returned via query params
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      setStatus({ loading: false, error: errorParam });
+    }
+
+    // Clean up the Facebook #_=_ fragment so back/refresh is tidy
+    if (window.location.hash === "#_=_" && window.history.replaceState) {
+      const cleanUrl = window.location.href.replace(/#_=_$/, "");
+      window.history.replaceState(null, "", cleanUrl);
+    }
+  }, [searchParams]);
+
+  const handleSocialLogin = (provider) => {
+    // Redirect user to backend OAuth endpoint
+    window.location.href = `${API_URL}/auth/${provider}`;
+  };
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -181,6 +201,7 @@ const Login = () => {
                   <button
                     type="button"
                     className="flex items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-400/60 hover:bg-slate-900/70 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-500/40"
+                    onClick={() => handleSocialLogin("google")}
                   >
                     <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
                       <path
@@ -196,6 +217,7 @@ const Login = () => {
                   <button
                     type="button"
                     className="flex items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-400/60 hover:bg-slate-900/70 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-500/40"
+                    onClick={() => handleSocialLogin("facebook")}
                   >
                     <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M22 12.07C22 6.48 17.52 2 11.93 2 6.35 2 2 6.48 2 12.07 2 17.1 5.66 21.2 10.44 22v-7.03H7.9v-2.9h2.54v-2.2c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.25 0-1.65.78-1.65 1.57v1.84h2.8l-.45 2.9h-2.35V22C18.34 21.2 22 17.1 22 12.07Z" />

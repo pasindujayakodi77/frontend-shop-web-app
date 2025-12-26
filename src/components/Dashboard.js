@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
-import { clearUserData, getUserData } from '../utils/auth';
-import { dashboardAPI } from '../utils/api';
+import { clearUserData, getUserData } from "../utils/auth";
+import { dashboardAPI } from "../utils/api";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,7 +11,7 @@ import {
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 } from "chart.js";
 
 // Register Chart.js components
@@ -24,6 +24,9 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+// Use environment variable for API URL
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -146,12 +149,12 @@ const Dashboard = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/auth/me", {
+      const response = await fetch(`${API_URL}/auth/me`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -189,67 +192,6 @@ const Dashboard = () => {
     window.location.href = "/login";
   };
 
-  const handleNavigation = (path) => {
-    if (path === "Inventory") {
-      navigate("/inventory");
-    } else if (path === "Sales") {
-      navigate("/sales");
-    } else if (path === "Expenses") {
-      navigate("/expenses");
-    } else if (path === "Reports") {
-      navigate("/reports");
-    } else {
-      alert(`Navigation to ${path} - Feature coming soon!`);
-    }
-  };
-
-  // Function to get theme colors based on shop category
-  const getThemeColors = (category) => {
-    const themes = {
-      "Computer Shop": {
-        header: "bg-blue-600",
-        stats: "text-blue-600",
-        primary: "bg-blue-600",
-        primaryHover: "hover:bg-blue-700",
-        primaryText: "text-blue-600",
-        primaryBorder: "border-blue-600",
-        light: "bg-blue-50",
-        lightHover: "hover:bg-blue-100",
-        lightBorder: "hover:border-blue-500",
-        gradient: "from-blue-500 to-blue-700"
-      },
-      "Grocery Store": {
-        header: "bg-green-600",
-        stats: "text-green-600",
-        primary: "bg-green-600",
-        primaryHover: "hover:bg-green-700",
-        primaryText: "text-green-600",
-        primaryBorder: "border-green-600",
-        light: "bg-green-50",
-        lightHover: "hover:bg-green-100",
-        lightBorder: "hover:border-green-500",
-        gradient: "from-green-500 to-green-700"
-      },
-      "Clothing Store": {
-        header: "bg-pink-600",
-        stats: "text-pink-600",
-        primary: "bg-pink-600",
-        primaryHover: "hover:bg-pink-700",
-        primaryText: "text-pink-600",
-        primaryBorder: "border-pink-600",
-        light: "bg-pink-50",
-        lightHover: "hover:bg-pink-100",
-        lightBorder: "hover:border-pink-500",
-        gradient: "from-pink-500 to-pink-700"
-      }
-    };
-
-    // Return default theme (blue) if category not found
-    return themes[category] || themes["Computer Shop"];
-  };
-
-  const themeColors = getThemeColors(user?.category);
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -268,180 +210,162 @@ const Dashboard = () => {
 
   // Dummy data for stats
   const statsDisplay = [
-    { label: "Total Products", value: stats.totalProducts.toString(), icon: "📦", color: "bg-blue-500" },
-    { label: "Total Sales", value: `LKR ${stats.totalRevenue.toFixed(2)}`, icon: "💰", color: "bg-green-500" },
-    { label: "Total Expenses", value: `LKR ${stats.totalExpenses.toFixed(2)}`, icon: "💸", color: "bg-red-500" }
-  ];
-
-  const menuItems = [
-    { label: "Inventory", icon: "📦", action: () => handleNavigation("Inventory") },
-    { label: "Sales", icon: "💵", action: () => handleNavigation("Sales") },
-    { label: "Expenses", icon: "💸", action: () => handleNavigation("Expenses") },
-    { label: "Reports", icon: "📊", action: () => handleNavigation("Reports") },
-    { label: "Logout", icon: "🚪", action: handleLogout }
+    { label: "Total Products", value: stats.totalProducts.toString(), icon: "📦" },
+    { label: "Total Sales", value: `LKR ${stats.totalRevenue.toFixed(2)}`, icon: "💰" },
+    { label: "Total Expenses", value: `LKR ${stats.totalExpenses.toFixed(2)}`, icon: "💸" }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className={`${themeColors.header} text-white shadow-md`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">Shop Management Dashboard</h1>
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
+      <div className="pointer-events-none absolute inset-0 select-none">
+        <div className="absolute -top-44 -left-36 h-80 w-80 rounded-full bg-cyan-500/16 blur-3xl" />
+        <div className="absolute -bottom-52 -right-28 h-96 w-96 rounded-full bg-emerald-500/14 blur-[110px]" />
+        <div className="absolute top-1/3 right-1/4 h-44 w-44 rotate-12 rounded-full bg-gradient-to-br from-blue-600/25 via-cyan-500/25 to-emerald-400/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.03),_transparent_35%)]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <header className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/35 text-slate-900">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+                  <path d="M4 6h2l1.5 9h9l1.5-6H7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="18" r="1" fill="currentColor" />
+                  <circle cx="16" cy="18" r="1" fill="currentColor" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Dashboard</p>
+                <h1 className="text-2xl font-semibold text-slate-50">ShopFlow Control Center</h1>
+              </div>
+            </div>
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition duration-200"
+              className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
             >
               Logout
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            Welcome, {user?.name || "User"}! 👋
-          </h2>
-          <p className="text-lg text-gray-600">
-            Shop Category: <span className={`font-semibold ${themeColors.primaryText}`}>{user?.category || user?.shopCategory || "N/A"}</span>
-          </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {statsDisplay.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
-                  <p className={`text-3xl font-bold ${themeColors.stats}`}>{stat.value}</p>
-                </div>
-                <div className={`${stat.color} text-white text-4xl p-3 rounded-full`}>
-                  {stat.icon}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation Menu */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button onClick={() => navigate("/inventory")} className="bg-blue-500 text-white p-4 rounded shadow hover:bg-blue-600">
-              Inventory
-            </button>
-            <button onClick={() => navigate("/sales")} className="bg-green-500 text-white p-4 rounded shadow hover:bg-green-600">
-              Sales
-            </button>
-            <button onClick={() => navigate("/expenses")} className="bg-red-500 text-white p-4 rounded shadow hover:bg-red-600">
-              Expenses
-            </button>
-            <button onClick={() => navigate("/reports")} className="bg-purple-500 text-white p-4 rounded shadow hover:bg-purple-600">
-              Reports
-            </button>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="mt-8 space-y-8">
-          {/* Daily Sales Chart */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Daily Sales - Current Month</h3>
-            <div className="h-80">
-              {chartData.dailySales && (
-                <Bar 
-                  data={chartData.dailySales}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        position: 'top',
-                      },
-                      title: {
-                        display: true,
-                        text: 'Daily Sales Overview'
-                      }
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true
-                      }
-                    }
-                  }}
-                />
-              )}
+        <main className="space-y-8">
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-3xl font-semibold text-slate-50">Welcome, {user?.name || "User"}! 👋</h2>
+              <p className="text-sm text-slate-400">Shop category: <span className="font-semibold text-cyan-300">{user?.category || user?.shopCategory || "N/A"}</span></p>
             </div>
           </div>
 
-          {/* Expenses by Category and Revenue vs Expenses */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Expenses by Category Pie Chart */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Expenses by Category</h3>
-              <div className="h-80 flex items-center justify-center">
-                {chartData.expensesByCategory ? (
-                  <Pie 
-                    data={chartData.expensesByCategory}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'bottom',
-                        },
-                        title: {
-                          display: true,
-                          text: 'Expense Distribution'
-                        }
-                      }
-                    }}
-                  />
-                ) : (
-                  <p className="text-gray-500">No expense data available</p>
-                )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {statsDisplay.map((stat, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-5 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.08em] text-slate-400">{stat.label}</p>
+                    <p className="text-3xl font-semibold text-slate-50">{stat.value}</p>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-emerald-400 text-slate-900 text-2xl shadow-lg shadow-cyan-500/30">
+                    {stat.icon}
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Revenue vs Expenses Bar Chart */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Revenue vs Expenses</h3>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+            <h3 className="text-lg font-semibold text-slate-100 mb-4">Quick actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <button onClick={() => navigate("/inventory")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+                Inventory
+              </button>
+              <button onClick={() => navigate("/sales")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+                Sales
+              </button>
+              <button onClick={() => navigate("/expenses")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+                Expenses
+              </button>
+              <button onClick={() => navigate("/reports")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+                Reports
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-8">
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Daily Sales - Current Month</h3>
               <div className="h-80">
-                {chartData.revenueVsExpenses && (
-                  <Bar 
-                    data={chartData.revenueVsExpenses}
+                {chartData.dailySales && (
+                  <Bar
+                    data={chartData.dailySales}
                     options={{
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
-                        legend: {
-                          position: 'top',
-                        },
-                        title: {
-                          display: true,
-                          text: 'Monthly Comparison'
-                        }
+                        legend: { position: "top", labels: { color: "#e2e8f0" } },
+                        title: { display: true, text: "Daily Sales Overview", color: "#e2e8f0" },
                       },
                       scales: {
-                        y: {
-                          beginAtZero: true
-                        }
-                      }
+                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                        y: { beginAtZero: true, ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                      },
                     }}
                   />
                 )}
               </div>
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <h3 className="text-lg font-semibold text-slate-100 mb-4">Expenses by Category</h3>
+                <div className="h-80 flex items-center justify-center">
+                  {chartData.expensesByCategory ? (
+                    <Pie
+                      data={chartData.expensesByCategory}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: "bottom", labels: { color: "#e2e8f0" } },
+                          title: { display: true, text: "Expense Distribution", color: "#e2e8f0" },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <p className="text-slate-400">No expense data available</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <h3 className="text-lg font-semibold text-slate-100 mb-4">Revenue vs Expenses</h3>
+                <div className="h-80">
+                  {chartData.revenueVsExpenses && (
+                    <Bar
+                      data={chartData.revenueVsExpenses}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { position: "top", labels: { color: "#e2e8f0" } },
+                          title: { display: true, text: "Monthly Comparison", color: "#e2e8f0" },
+                        },
+                        scales: {
+                          x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                          y: { beginAtZero: true, ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                        },
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

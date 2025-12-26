@@ -10,6 +10,7 @@ const OAuthHandler = () => {
     const token = searchParams.get("token");
     const userId = searchParams.get("userId");
     const shopCategory = searchParams.get("shopCategory");
+    const categorySelected = searchParams.get("categorySelected");
     const error = searchParams.get("error");
     const pendingToken = searchParams.get("pendingToken");
     const provider = searchParams.get("provider");
@@ -38,8 +39,11 @@ const OAuthHandler = () => {
       localStorage.setItem("userId", userId);
     }
 
-    // If user already has a category, go to dashboard; else prompt selection
-    if (shopCategory) {
+    // Normalize params and decide where to send the user
+    const hasValidCategory = !!shopCategory && shopCategory !== "null" && shopCategory !== "undefined";
+    const hasCompletedCategory = categorySelected === "true";
+
+    if (hasValidCategory && hasCompletedCategory) {
       navigate("/dashboard", { replace: true });
     } else {
       navigate("/select-category", { replace: true });

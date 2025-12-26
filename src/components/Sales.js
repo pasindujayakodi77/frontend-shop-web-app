@@ -205,238 +205,233 @@ const Sales = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-200">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-b-2 border-cyan-400"></div>
+          <p className="text-sm text-slate-400">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Sales Management</h1>
-          <div className="flex gap-4">
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
+      <div className="pointer-events-none absolute inset-0 select-none">
+        <div className="absolute -top-44 -left-36 h-80 w-80 rounded-full bg-cyan-500/16 blur-3xl" />
+        <div className="absolute -bottom-52 -right-28 h-96 w-96 rounded-full bg-emerald-500/14 blur-[110px]" />
+        <div className="absolute top-1/3 right-1/4 h-44 w-44 rotate-12 rounded-full bg-gradient-to-br from-blue-600/25 via-cyan-500/25 to-emerald-400/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.03),_transparent_35%)]" />
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Action Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
-          >
-            {showForm ? "Cancel" : "Record New Sale"}
-          </button>
-        </div>
-
-        {/* Sale Form */}
-        {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Record New Sale</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                {/* Product Selection Rows */}
-                {selectedProducts.map((sp, index) => (
-                  <div key={index} className="flex gap-4 items-start">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Product
-                      </label>
-                      <select
-                        value={sp.productId}
-                        onChange={(e) =>
-                          handleProductChange(index, "productId", e.target.value)
-                        }
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select a product</option>
-                        {products.map((product) => (
-                          <option key={product._id || product.id} value={product._id || product.id}>
-                            {product.name} - Stock: {product.quantity} - Price: LKR
-                            {product.sellingPrice}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="w-32">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Quantity
-                      </label>
-                      <input
-                        type="number"
-                        value={sp.quantity}
-                        onChange={(e) =>
-                          handleProductChange(index, "quantity", e.target.value)
-                        }
-                        min="1"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Qty"
-                        required
-                      />
-                    </div>
-
-                    {selectedProducts.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveProductRow(index)}
-                        className="mt-8 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                {/* Add Product Button */}
-                <button
-                  type="button"
-                  onClick={handleAddProductRow}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  + Add Another Product
-                </button>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <header className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/35 text-slate-900">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+                  <path d="M4 6h2l1.5 9h9l1.5-6H7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="18" r="1" fill="currentColor" />
+                  <circle cx="16" cy="18" r="1" fill="currentColor" />
+                </svg>
               </div>
-
-              {/* Form Actions */}
-              <div className="mt-6 flex gap-4">
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Record Sale
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Sales</p>
+                <h1 className="text-2xl font-semibold text-slate-50">Sales Management</h1>
               </div>
-            </form>
-          </div>
-        )}
-
-        {/* Sales Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800">Sales History</h2>
-          </div>
-
-          {sales.length === 0 ? (
-            <div className="px-6 py-12 text-center text-gray-500">
-              No sales recorded yet. Click "Record New Sale" to get started.
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Products
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Revenue
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Profit
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {sales.map((sale) => (
-                    <tr key={sale._id || sale.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(sale.date)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="space-y-1">
-                          {sale.products.map((product, idx) => (
-                            <div key={idx}>
-                              {product.productName} x {product.quantity}
-                            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={handleLogout}
+                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="space-y-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-50">Sales Records</h2>
+              <p className="text-sm text-slate-400">Log sales, track revenue, and stay on stock.</p>
+            </div>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+            >
+              {showForm ? "Cancel" : "Record New Sale"}
+            </button>
+          </div>
+
+          {showForm && (
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+              <h2 className="text-lg font-semibold text-slate-50 mb-4">Record New Sale</h2>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-4">
+                  {selectedProducts.map((sp, index) => (
+                    <div key={index} className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
+                      <div className="flex-1">
+                        <label className="block text-sm text-slate-300 mb-2">Product</label>
+                        <select
+                          value={sp.productId}
+                          onChange={(e) => handleProductChange(index, "productId", e.target.value)}
+                          className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                          required
+                        >
+                          <option value="">Select a product</option>
+                          {products.map((product) => (
+                            <option key={product._id || product.id} value={product._id || product.id}>
+                              {product.name} · Stock {product.quantity} · LKR {product.sellingPrice}
+                            </option>
                           ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                        {formatCurrency(sale.totalRevenue)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                        {formatCurrency(sale.totalProfit)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEdit(sale)}
-                            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(sale._id || sale.id)}
-                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        </select>
+                      </div>
+
+                      <div className="w-full sm:w-32">
+                        <label className="block text-sm text-slate-300 mb-2">Quantity</label>
+                        <input
+                          type="number"
+                          value={sp.quantity}
+                          onChange={(e) => handleProductChange(index, "quantity", e.target.value)}
+                          min="1"
+                          className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                          placeholder="Qty"
+                          required
+                        />
+                      </div>
+
+                      {selectedProducts.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProductRow(index)}
+                          className="sm:mt-8 inline-flex items-center justify-center rounded-xl border border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/20"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   ))}
-                </tbody>
-              </table>
+
+                  <button
+                    type="button"
+                    onClick={handleAddProductRow}
+                    className="rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300"
+                  >
+                    + Add Another Product
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+                  >
+                    Record Sale
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="rounded-xl border border-slate-700/70 bg-slate-800/70 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           )}
-        </div>
 
-        {/* Summary Statistics */}
-        {sales.length > 0 && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-sm font-medium text-gray-500 uppercase">Total Sales</h3>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{sales.length}</p>
+          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-800/60">
+              <h2 className="text-lg font-semibold text-slate-50">Sales History</h2>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-sm font-medium text-gray-500 uppercase">Total Revenue</h3>
-              <p className="mt-2 text-3xl font-bold text-green-600">
-                {formatCurrency(sales.reduce((sum, sale) => sum + sale.totalRevenue, 0))}
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-sm font-medium text-gray-500 uppercase">Total Profit</h3>
-              <p className="mt-2 text-3xl font-bold text-blue-600">
-                {formatCurrency(sales.reduce((sum, sale) => sum + sale.totalProfit, 0))}
-              </p>
-            </div>
+
+            {sales.length === 0 ? (
+              <div className="px-6 py-12 text-center text-slate-400">
+                No sales recorded yet. Click "Record New Sale" to get started.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-slate-800/80 text-slate-300">
+                    <tr>
+                      <th className="px-6 py-3 text-left font-semibold">Date</th>
+                      <th className="px-6 py-3 text-left font-semibold">Products</th>
+                      <th className="px-6 py-3 text-left font-semibold">Total Revenue</th>
+                      <th className="px-6 py-3 text-left font-semibold">Total Profit</th>
+                      <th className="px-6 py-3 text-left font-semibold">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/70">
+                    {sales.map((sale) => (
+                      <tr key={sale._id || sale.id} className="hover:bg-slate-800/50">
+                        <td className="px-6 py-4 text-slate-100 whitespace-nowrap">{formatDate(sale.date)}</td>
+                        <td className="px-6 py-4 text-slate-300">
+                          <div className="space-y-1">
+                            {sale.products.map((product, idx) => (
+                              <div key={idx}>
+                                {product.productName} x {product.quantity}
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-emerald-300 font-semibold whitespace-nowrap">
+                          {formatCurrency(sale.totalRevenue)}
+                        </td>
+                        <td className="px-6 py-4 text-cyan-300 font-semibold whitespace-nowrap">
+                          {formatCurrency(sale.totalProfit)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(sale)}
+                              className="rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-1.5 text-amber-100 transition hover:bg-amber-500/20"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(sale._id || sale.id)}
+                              className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-3 py-1.5 text-rose-100 transition hover:bg-rose-500/20"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
+
+          {sales.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <p className="text-sm text-slate-400">Total Sales</p>
+                <p className="text-2xl font-semibold text-slate-50">{sales.length}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <p className="text-sm text-slate-400">Total Revenue</p>
+                <p className="text-2xl font-semibold text-emerald-300">
+                  {formatCurrency(sales.reduce((sum, sale) => sum + sale.totalRevenue, 0))}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <p className="text-sm text-slate-400">Total Profit</p>
+                <p className="text-2xl font-semibold text-cyan-300">
+                  {formatCurrency(sales.reduce((sum, sale) => sum + sale.totalProfit, 0))}
+                </p>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

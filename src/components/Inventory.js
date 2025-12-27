@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productsAPI } from "../utils/api";
 
@@ -7,6 +7,7 @@ const Inventory = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
   const [formData, setFormData] = useState({
     name: "",
     productNumber: "",
@@ -19,7 +20,6 @@ const Inventory = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load products from backend API on mount
     fetchProducts();
   }, []);
 
@@ -27,13 +27,12 @@ const Inventory = () => {
     try {
       setLoading(true);
       const data = await productsAPI.getAll();
-      // Backend returns {products: [...]} so extract the products array
       const productsArray = data.products || data;
       setProducts(Array.isArray(productsArray) ? productsArray : []);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
       setProducts([]);
-      alert('Failed to load products. Please make sure you are logged in and the backend is running.');
+      alert("Failed to load products. Please make sure you are logged in and the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -46,31 +45,27 @@ const Inventory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const productData = {
       name: formData.name,
       productNumber: formData.productNumber,
       brand: formData.brand,
       category: formData.category,
-      quantity: parseInt(formData.quantity),
+      quantity: parseInt(formData.quantity, 10),
       costPrice: parseFloat(formData.costPrice),
       sellingPrice: parseFloat(formData.sellingPrice)
     };
 
     try {
       if (editingProduct) {
-        // Update existing product
         await productsAPI.update(editingProduct._id || editingProduct.id, productData);
         setEditingProduct(null);
       } else {
-        // Add new product
         await productsAPI.create(productData);
       }
 
-      // Refresh products from backend
       await fetchProducts();
 
-      // Reset form
       setFormData({
         name: "",
         productNumber: "",
@@ -82,20 +77,17 @@ const Inventory = () => {
       });
       setShowForm(false);
     } catch (error) {
-      console.error('Error saving product:', error);
-      let errorMessage = 'Failed to save product. ';
-      
+      console.error("Error saving product:", error);
+      let errorMessage = "Failed to save product. ";
+
       if (error.response) {
-        // Server responded with error
         errorMessage += error.response.data.message || error.response.data.error || `Server error: ${error.response.status}`;
       } else if (error.request) {
-        // Request made but no response
-        errorMessage += 'Cannot reach server. Please check your connection and ensure the backend is running.';
+        errorMessage += "Cannot reach server. Please check your connection and ensure the backend is running.";
       } else {
-        // Error in request setup
         errorMessage += error.message;
       }
-      
+
       alert(errorMessage);
     }
   };
@@ -120,8 +112,8 @@ const Inventory = () => {
         await productsAPI.delete(id);
         await fetchProducts();
       } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Failed to delete product. Please try again.');
+        console.error("Error deleting product:", error);
+        alert("Failed to delete product. Please try again.");
       }
     }
   };
@@ -143,6 +135,18 @@ const Inventory = () => {
   const handleBackToDashboard = () => {
     navigate("/dashboard");
   };
+
+  const displayedProducts = useMemo(() => {
+    if (activeTab !== "recent") return products;
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    return products.filter((product) => {
+      if (!product.createdAt) return false;
+      return new Date(product.createdAt) >= sevenDaysAgo;
+    });
+  }, [activeTab, products]);
 
   if (loading) {
     return (
@@ -195,12 +199,36 @@ const Inventory = () => {
               <h2 className="text-xl font-semibold text-slate-50">Products List</h2>
               <p className="text-sm text-slate-400">Manage stock, pricing, and categories.</p>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
-            >
-              {showForm ? "Cancel" : "+ Add New Product"}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <div className="inline-flex rounded-xl border border-slate-800/70 bg-slate-900/60 p-1 text-sm font-semibold text-slate-200">
+                <button
+                  onClick={() => setActiveTab("all")}
+                  className={`rounded-lg px-3 py-1.5 transition ${
+                    activeTab === "all"
+                      ? "bg-slate-800 text-white shadow-inner shadow-slate-900"
+                      : "hover:text-white"
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setActiveTab("recent")}
+                  className={`rounded-lg px-3 py-1.5 transition ${
+                    activeTab === "recent"
+                      ? "bg-slate-800 text-white shadow-inner shadow-slate-900"
+                      : "hover:text-white"
+                  }`}
+                >
+                  Last 7 days
+                </button>
+              </div>
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+              >
+                {showForm ? "Cancel" : "+ Add New Product"}
+              </button>
+            </div>
           </div>
 
           {showForm && (
@@ -321,8 +349,12 @@ const Inventory = () => {
           )}
 
           <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
-            {products.length === 0 ? (
-              <div className="p-12 text-center text-slate-400">No products available. Add your first product!</div>
+            {displayedProducts.length === 0 ? (
+              <div className="p-12 text-center text-slate-400">
+                {activeTab === "recent"
+                  ? "No products added in the last 7 days."
+                  : "No products available. Add your first product!"}
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
@@ -339,7 +371,7 @@ const Inventory = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/70">
-                    {products.map((product) => (
+                    {displayedProducts.map((product) => (
                       <tr key={product._id || product.id} className="hover:bg-slate-800/50">
                         <td className="px-6 py-3 text-slate-100">{product.name}</td>
                         <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
@@ -370,22 +402,22 @@ const Inventory = () => {
             )}
           </div>
 
-          {products.length > 0 && (
+          {displayedProducts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
                 <p className="text-sm text-slate-400">Total Products</p>
-                <p className="text-2xl font-semibold text-slate-50">{products.length}</p>
+                <p className="text-2xl font-semibold text-slate-50">{displayedProducts.length}</p>
               </div>
               <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
                 <p className="text-sm text-slate-400">Total Inventory Value (Cost)</p>
                 <p className="text-2xl font-semibold text-emerald-300">
-                  LKR {products.reduce((sum, p) => sum + p.costPrice * p.quantity, 0).toFixed(2)}
+                  LKR {displayedProducts.reduce((sum, p) => sum + p.costPrice * p.quantity, 0).toFixed(2)}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
                 <p className="text-sm text-slate-400">Total Inventory Value (Selling)</p>
                 <p className="text-2xl font-semibold text-cyan-300">
-                  LKR {products.reduce((sum, p) => sum + p.sellingPrice * p.quantity, 0).toFixed(2)}
+                  LKR {displayedProducts.reduce((sum, p) => sum + p.sellingPrice * p.quantity, 0).toFixed(2)}
                 </p>
               </div>
             </div>

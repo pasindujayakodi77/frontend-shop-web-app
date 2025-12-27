@@ -235,6 +235,17 @@ export const dashboardAPI = {
       console.error('Error fetching revenue vs expenses:', error);
       throw error;
     }
+  },
+
+  // Get rich insights (monthly revenue, AOV, margin, weekly sales, expense mix, top products, recent sales)
+  getInsights: async () => {
+    try {
+      const response = await axiosInstance.get('/dashboard/insights');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching dashboard insights:', error);
+      throw error;
+    }
   }
 };
 

@@ -33,14 +33,20 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalRevenue: 0,
-    totalExpenses: 0
+    monthlyRevenue: 0,
+    averageOrderValue: 0,
+    netMarginPct: 0,
+    productCount: 0,
+    orderCount: 0
   });
   const [chartData, setChartData] = useState({
-    dailySales: null,
+    weeklySales: null,
     expensesByCategory: null,
     revenueVsExpenses: null
+  });
+  const [lists, setLists] = useState({
+    recentSales: [],
+    topProducts: [],
   });
   const navigate = useNavigate();
 
@@ -51,49 +57,49 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch all dashboard data in parallel
-      const [statsData, dailySalesData, expensesCategoryData, revenueExpensesData] = await Promise.all([
-        dashboardAPI.getStats(),
-        dashboardAPI.getDailySales(),
-        dashboardAPI.getExpensesByCategory(),
-        dashboardAPI.getRevenueVsExpenses()
-      ]);
+      const insights = await dashboardAPI.getInsights();
 
-      // Update stats
       setStats({
-        totalProducts: statsData.totalProducts,
-        totalRevenue: statsData.totalRevenue,
-        totalExpenses: statsData.totalExpenses
+        monthlyRevenue: insights.monthlyRevenue || 0,
+        averageOrderValue: insights.averageOrderValue || 0,
+        netMarginPct: insights.netMarginPct || 0,
+        productCount: insights.productCount || 0,
+        orderCount: insights.orderCount || 0,
       });
 
-      // Process daily sales data
-      const dailySalesLabels = dailySalesData.map(d => `Day ${d.day}`);
-      const dailySalesValues = dailySalesData.map(d => d.revenue);
+      const weeklyLabels = (insights.weeklySales || []).map((d) => d.label);
+      const weeklyTotals = (insights.weeklySales || []).map((d) => d.total);
 
-      // Process expenses by category
-      const expenseCategories = expensesCategoryData.map(e => e.category);
-      const expenseAmounts = expensesCategoryData.map(e => e.amount);
+      const expenseCategories = (insights.expenseMix || []).map((e) => e.category);
+      const expenseAmounts = (insights.expenseMix || []).map((e) => e.amount);
 
-      // Process revenue vs expenses
-      const months = revenueExpensesData.map(m => m.month);
-      const revenueData = revenueExpensesData.map(m => m.revenue);
-      const expensesData = revenueExpensesData.map(m => m.expenses);
+      const revenueVsExpenses = insights.revenueVsExpenses || [];
+      const months = revenueVsExpenses.map((m) => m.month);
+      const revenueData = revenueVsExpenses.map((m) => m.revenue);
+      const expensesData = revenueVsExpenses.map((m) => m.expenses);
+
+      setLists({
+        recentSales: insights.recentSales || [],
+        topProducts: insights.topProducts || [],
+      });
 
       setChartData({
-        dailySales: {
-          labels: dailySalesLabels,
-          datasets: [{
-            label: 'Daily Sales (LKR)',
-            data: dailySalesValues,
-            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1
-          }]
+        weeklySales: {
+          labels: weeklyLabels,
+          datasets: [
+            {
+              label: 'Weekly Sales',
+              data: weeklyTotals,
+              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1,
+            },
+          ],
         },
         expensesByCategory: expenseCategories.length > 0 ? {
           labels: expenseCategories,
           datasets: [{
-            label: 'Expenses by Category (LKR)',
+            label: 'Expenses by Category',
             data: expenseAmounts,
             backgroundColor: [
               'rgba(239, 68, 68, 0.8)',
@@ -118,14 +124,14 @@ const Dashboard = () => {
           labels: months,
           datasets: [
             {
-              label: 'Revenue (LKR)',
+              label: 'Revenue',
               data: revenueData,
               backgroundColor: 'rgba(34, 197, 94, 0.8)',
               borderColor: 'rgba(34, 197, 94, 1)',
               borderWidth: 1
             },
             {
-              label: 'Expenses (LKR)',
+              label: 'Expenses',
               data: expensesData,
               backgroundColor: 'rgba(239, 68, 68, 0.8)',
               borderColor: 'rgba(239, 68, 68, 1)',
@@ -136,8 +142,6 @@ const Dashboard = () => {
       });
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      // Don't set error state here, just log it
-      // Dashboard can still be shown with empty data
     }
   };
 
@@ -208,11 +212,10 @@ const Dashboard = () => {
     );
   }
 
-  // Dummy data for stats
   const statsDisplay = [
-    { label: "Total Products", value: stats.totalProducts.toString(), icon: "📦" },
-    { label: "Total Sales", value: `LKR ${stats.totalRevenue.toFixed(2)}`, icon: "💰" },
-    { label: "Total Expenses", value: `LKR ${stats.totalExpenses.toFixed(2)}`, icon: "💸" }
+    { label: "Monthly Revenue", value: `LKR ${stats.monthlyRevenue.toFixed(2)}`, icon: "💰" },
+    { label: "Average Order Value", value: `LKR ${stats.averageOrderValue.toFixed(2)}`, icon: "🧾" },
+    { label: "Net Margin", value: `${stats.netMarginPct.toFixed(1)}%`, icon: "📈" },
   ];
 
   return (
@@ -296,17 +299,17 @@ const Dashboard = () => {
 
           <div className="space-y-8">
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Daily Sales - Current Month</h3>
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Weekly Sales (last 7 days)</h3>
               <div className="h-80">
-                {chartData.dailySales && (
+                {chartData.weeklySales && (
                   <Bar
-                    data={chartData.dailySales}
+                    data={chartData.weeklySales}
                     options={{
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: { position: "top", labels: { color: "#e2e8f0" } },
-                        title: { display: true, text: "Daily Sales Overview", color: "#e2e8f0" },
+                        title: { display: false },
                       },
                       scales: {
                         x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
@@ -360,6 +363,50 @@ const Dashboard = () => {
                       }}
                     />
                   )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-100">Top Products</h3>
+                  <span className="text-xs text-slate-400">By quantity sold</span>
+                </div>
+                <div className="space-y-3">
+                  {lists.topProducts.length === 0 && (
+                    <p className="text-slate-400 text-sm">No product sales yet</p>
+                  )}
+                  {lists.topProducts.map((product) => (
+                    <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-100">{product.name}</p>
+                        <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
+                      </div>
+                      <div className="text-sm text-slate-200">{product.sellingPrice ? `LKR ${product.sellingPrice}` : ""}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-100">Recent Sales</h3>
+                  <span className="text-xs text-slate-400">Latest 5 orders</span>
+                </div>
+                <div className="space-y-3">
+                  {lists.recentSales.length === 0 && (
+                    <p className="text-slate-400 text-sm">No sales recorded yet</p>
+                  )}
+                  {lists.recentSales.map((sale) => (
+                    <div key={sale.id} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-100">Sale {sale.id}</p>
+                        <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
+                      </div>
+                      <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

@@ -508,7 +508,7 @@ const Inventory = () => {
                         return (
                           <tr key={item._id} className="hover:bg-slate-800/50">
                             <td className="px-6 py-3 text-slate-300">{new Date(item.createdAt).toLocaleString()}</td>
-                            <td className="px-6 py-3 text-slate-100">{product.name || "Unknown product"}</td>
+                            <td className="px-6 py-3 text-slate-100">{product.name || item.before?.name || "Unknown product"}</td>
                             <td className="px-6 py-3 text-slate-100 capitalize">{item.action}</td>
                             <td className="px-6 py-3 text-slate-300">{actor}</td>
                             <td className="px-6 py-3 text-slate-300">{formatChangeDetails(item)}</td>

@@ -188,6 +188,17 @@ export const productsAPI = {
       console.error('Error deleting product:', error);
       throw error;
     }
+  },
+
+  // Get product change history (last 90 days by default)
+  getHistory: async () => {
+    try {
+      const response = await axiosInstance.get('/products/history');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching product history:', error);
+      throw error;
+    }
   }
 };
 

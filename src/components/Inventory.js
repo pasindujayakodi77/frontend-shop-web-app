@@ -4,9 +4,11 @@ import { productsAPI } from "../utils/api";
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);
+  const [history, setHistory] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [formData, setFormData] = useState({
     name: "",
@@ -21,6 +23,7 @@ const Inventory = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchHistory();
   }, []);
 
   const fetchProducts = async () => {
@@ -35,6 +38,20 @@ const Inventory = () => {
       alert("Failed to load products. Please make sure you are logged in and the backend is running.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    try {
+      setHistoryLoading(true);
+      const data = await productsAPI.getHistory();
+      const historyArray = data.history || data;
+      setHistory(Array.isArray(historyArray) ? historyArray : []);
+    } catch (error) {
+      console.error("Error fetching product history:", error);
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -65,6 +82,7 @@ const Inventory = () => {
       }
 
       await fetchProducts();
+      await fetchHistory();
 
       setFormData({
         name: "",
@@ -111,6 +129,7 @@ const Inventory = () => {
       try {
         await productsAPI.delete(id);
         await fetchProducts();
+        await fetchHistory();
       } catch (error) {
         console.error("Error deleting product:", error);
         alert("Failed to delete product. Please try again.");
@@ -147,6 +166,28 @@ const Inventory = () => {
       return new Date(product.createdAt) >= sevenDaysAgo;
     });
   }, [activeTab, products]);
+
+  const formatChangeDetails = (item) => {
+    if (item.action === "delete") return "Deleted";
+    if (!Array.isArray(item.changedFields) || item.changedFields.length === 0) return "-";
+
+    const before = item.before || {};
+    const after = item.after || {};
+
+    return item.changedFields.map((field) => {
+      const prev = before[field];
+      const next = after[field];
+
+      if (field === "quantity") {
+        const hasNumbers = typeof prev === "number" && typeof next === "number";
+        const delta = hasNumbers ? next - prev : null;
+        const deltaText = delta === null ? "" : ` (${delta >= 0 ? "+" : ""}${delta})`;
+        return `quantity: ${prev ?? "-"} -> ${next ?? "-"}${deltaText}`;
+      }
+
+      return `${field}: ${prev ?? "-"} -> ${next ?? "-"}`;
+    }).join("; ");
+  };
 
   if (loading) {
     return (
@@ -220,6 +261,16 @@ const Inventory = () => {
                   }`}
                 >
                   Last 7 days
+                </button>
+                <button
+                  onClick={() => setActiveTab("history")}
+                  className={`rounded-lg px-3 py-1.5 transition ${
+                    activeTab === "history"
+                      ? "bg-slate-800 text-white shadow-inner shadow-slate-900"
+                      : "hover:text-white"
+                  }`}
+                >
+                  History
                 </button>
               </div>
               <button
@@ -348,78 +399,126 @@ const Inventory = () => {
             </div>
           )}
 
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
-            {displayedProducts.length === 0 ? (
-              <div className="p-12 text-center text-slate-400">
-                {activeTab === "recent"
-                  ? "No products added in the last 7 days."
-                  : "No products available. Add your first product!"}
+          {activeTab !== "history" && (
+            <>
+              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
+                {displayedProducts.length === 0 ? (
+                  <div className="p-12 text-center text-slate-400">
+                    {activeTab === "recent"
+                      ? "No products added in the last 7 days."
+                      : "No products available. Add your first product!"}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-slate-800/80 text-slate-300">
+                        <tr>
+                          <th className="px-6 py-3 text-left font-semibold">Name</th>
+                          <th className="px-6 py-3 text-left font-semibold">Product #</th>
+                          <th className="px-6 py-3 text-left font-semibold">Brand</th>
+                          <th className="px-6 py-3 text-left font-semibold">Category</th>
+                          <th className="px-6 py-3 text-left font-semibold">Quantity</th>
+                          <th className="px-6 py-3 text-left font-semibold">Cost Price</th>
+                          <th className="px-6 py-3 text-left font-semibold">Selling Price</th>
+                          <th className="px-6 py-3 text-left font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/70">
+                        {displayedProducts.map((product) => (
+                          <tr key={product._id || product.id} className="hover:bg-slate-800/50">
+                            <td className="px-6 py-3 text-slate-100">{product.name}</td>
+                            <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
+                            <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
+                            <td className="px-6 py-3 text-slate-300">{product.category}</td>
+                            <td className="px-6 py-3 text-slate-300">{product.quantity}</td>
+                            <td className="px-6 py-3 text-slate-300">LKR {product.costPrice.toFixed(2)}</td>
+                            <td className="px-6 py-3 text-slate-300">LKR {product.sellingPrice.toFixed(2)}</td>
+                            <td className="px-6 py-3 flex gap-3 text-slate-200">
+                              <button
+                                onClick={() => handleEdit(product)}
+                                className="text-cyan-300 transition hover:text-cyan-200"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(product._id || product.id)}
+                                className="text-rose-300 transition hover:text-rose-200"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-slate-800/80 text-slate-300">
-                    <tr>
-                      <th className="px-6 py-3 text-left font-semibold">Name</th>
-                      <th className="px-6 py-3 text-left font-semibold">Product #</th>
-                      <th className="px-6 py-3 text-left font-semibold">Brand</th>
-                      <th className="px-6 py-3 text-left font-semibold">Category</th>
-                      <th className="px-6 py-3 text-left font-semibold">Quantity</th>
-                      <th className="px-6 py-3 text-left font-semibold">Cost Price</th>
-                      <th className="px-6 py-3 text-left font-semibold">Selling Price</th>
-                      <th className="px-6 py-3 text-left font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/70">
-                    {displayedProducts.map((product) => (
-                      <tr key={product._id || product.id} className="hover:bg-slate-800/50">
-                        <td className="px-6 py-3 text-slate-100">{product.name}</td>
-                        <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
-                        <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
-                        <td className="px-6 py-3 text-slate-300">{product.category}</td>
-                        <td className="px-6 py-3 text-slate-300">{product.quantity}</td>
-                        <td className="px-6 py-3 text-slate-300">LKR {product.costPrice.toFixed(2)}</td>
-                        <td className="px-6 py-3 text-slate-300">LKR {product.sellingPrice.toFixed(2)}</td>
-                        <td className="px-6 py-3 flex gap-3 text-slate-200">
-                          <button
-                            onClick={() => handleEdit(product)}
-                            className="text-cyan-300 transition hover:text-cyan-200"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product._id || product.id)}
-                            className="text-rose-300 transition hover:text-rose-200"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
 
-          {displayedProducts.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-                <p className="text-sm text-slate-400">Total Products</p>
-                <p className="text-2xl font-semibold text-slate-50">{displayedProducts.length}</p>
-              </div>
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-                <p className="text-sm text-slate-400">Total Inventory Value (Cost)</p>
-                <p className="text-2xl font-semibold text-emerald-300">
-                  LKR {displayedProducts.reduce((sum, p) => sum + p.costPrice * p.quantity, 0).toFixed(2)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-                <p className="text-sm text-slate-400">Total Inventory Value (Selling)</p>
-                <p className="text-2xl font-semibold text-cyan-300">
-                  LKR {displayedProducts.reduce((sum, p) => sum + p.sellingPrice * p.quantity, 0).toFixed(2)}
-                </p>
-              </div>
+              {displayedProducts.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                    <p className="text-sm text-slate-400">Total Products</p>
+                    <p className="text-2xl font-semibold text-slate-50">{displayedProducts.length}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                    <p className="text-sm text-slate-400">Total Inventory Value (Cost)</p>
+                    <p className="text-2xl font-semibold text-emerald-300">
+                      LKR {displayedProducts.reduce((sum, p) => sum + p.costPrice * p.quantity, 0).toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                    <p className="text-sm text-slate-400">Total Inventory Value (Selling)</p>
+                    <p className="text-2xl font-semibold text-cyan-300">
+                      LKR {displayedProducts.reduce((sum, p) => sum + p.sellingPrice * p.quantity, 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "history" && (
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
+              {historyLoading ? (
+                <div className="p-12 text-center text-slate-400">Loading history...</div>
+              ) : history.length === 0 ? (
+                <div className="p-12 text-center text-slate-400">No edits or deletions in the last 90 days.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead className="bg-slate-800/80 text-slate-300">
+                      <tr>
+                        <th className="px-6 py-3 text-left font-semibold">When</th>
+                        <th className="px-6 py-3 text-left font-semibold">Product</th>
+                        <th className="px-6 py-3 text-left font-semibold">Action</th>
+                        <th className="px-6 py-3 text-left font-semibold">By</th>
+                        <th className="px-6 py-3 text-left font-semibold">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/70">
+                      {history.map((item) => {
+                        const product = item.productId || {};
+                        const user = item.userId || {};
+                        const actor = user.name || user.email || (user._id || "Unknown user");
+                        const changed = Array.isArray(item.changedFields) && item.changedFields.length > 0
+                          ? item.changedFields.join(", ")
+                          : "-";
+
+                        return (
+                          <tr key={item._id} className="hover:bg-slate-800/50">
+                            <td className="px-6 py-3 text-slate-300">{new Date(item.createdAt).toLocaleString()}</td>
+                            <td className="px-6 py-3 text-slate-100">{product.name || "Unknown product"}</td>
+                            <td className="px-6 py-3 text-slate-100 capitalize">{item.action}</td>
+                            <td className="px-6 py-3 text-slate-300">{actor}</td>
+                            <td className="px-6 py-3 text-slate-300">{formatChangeDetails(item)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
         </main>

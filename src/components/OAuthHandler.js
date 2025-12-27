@@ -1,53 +1,80 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 // Handles OAuth redirect from backend; stores token/userId then routes appropriately
 const OAuthHandler = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    const userId = searchParams.get("userId");
-    const shopCategory = searchParams.get("shopCategory");
-    const categorySelected = searchParams.get("categorySelected");
-    const error = searchParams.get("error");
-    const pendingToken = searchParams.get("pendingToken");
-    const provider = searchParams.get("provider");
-    const name = searchParams.get("name");
+    const handleOAuth = async () => {
+      const token = searchParams.get("token");
+      const userId = searchParams.get("userId");
+      const shopCategory = searchParams.get("shopCategory");
+      const categorySelected = searchParams.get("categorySelected");
+      const error = searchParams.get("error");
+      const pendingToken = searchParams.get("pendingToken");
+      const provider = searchParams.get("provider");
+      const name = searchParams.get("name");
 
-    if (error) {
-      navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
-      return;
-    }
+      if (error) {
+        navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
+        return;
+      }
 
-    // If provider didn't return an email, send user to email capture flow
-    if (pendingToken) {
-      const params = new URLSearchParams();
-      params.set("token", pendingToken);
-      if (provider) params.set("provider", provider);
-      if (name) params.set("name", name);
+      if (pendingToken) {
+        const params = new URLSearchParams();
+        params.set("token", pendingToken);
+        if (provider) params.set("provider", provider);
+        if (name) params.set("name", name);
 
-      navigate(`/social-email?${params.toString()}`, { replace: true });
-      return;
-    }
+        navigate(`/social-email?${params.toString()}`, { replace: true });
+        return;
+      }
 
-    if (token) {
-      localStorage.setItem("token", token);
-    }
-    if (userId) {
-      localStorage.setItem("userId", userId);
-    }
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      if (userId) {
+        localStorage.setItem("userId", userId);
+      }
 
-    // Normalize params and decide where to send the user
-    const hasValidCategory = !!shopCategory && shopCategory !== "null" && shopCategory !== "undefined";
-    const hasCompletedCategory = categorySelected === "true";
+      const hasValidCategoryParam = !!shopCategory && shopCategory !== "null" && shopCategory !== "undefined";
+      const hasCompletedCategoryParam = categorySelected === "true";
 
-    if (hasValidCategory && hasCompletedCategory) {
-      navigate("/dashboard", { replace: true });
-    } else {
-      navigate("/select-category", { replace: true });
-    }
+      // Prefer authoritative profile check to avoid skipping category selection incorrectly
+      let categoryFromProfile = null;
+      if (token) {
+        try {
+          const profileRes = await fetch(`${API_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+          if (profileRes.ok) {
+            const profile = await profileRes.json();
+            categoryFromProfile = profile.shopCategory || profile.category || null;
+          }
+        } catch (profileErr) {
+          console.warn("Profile lookup failed; falling back to query params", profileErr);
+        }
+      }
+
+      const resolvedCategory = categoryFromProfile || shopCategory;
+      const hasCategory = !!resolvedCategory && resolvedCategory !== "null" && resolvedCategory !== "undefined";
+      const hasCompletedCategory = hasCompletedCategoryParam || !!categoryFromProfile;
+
+      if (hasCategory && hasCompletedCategory) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/select-category", { replace: true });
+      }
+    };
+
+    handleOAuth();
   }, [navigate, searchParams]);
 
   return (

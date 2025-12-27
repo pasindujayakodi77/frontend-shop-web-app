@@ -390,6 +390,7 @@ const Sales = () => {
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-800/80 text-slate-300">
                     <tr>
+                      <th className="px-6 py-3 text-left font-semibold">Sale #</th>
                       <th className="px-6 py-3 text-left font-semibold">Date</th>
                       <th className="px-6 py-3 text-left font-semibold">Products</th>
                       <th className="px-6 py-3 text-left font-semibold">Total Revenue</th>
@@ -398,42 +399,46 @@ const Sales = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/70">
-                    {sales.map((sale) => (
-                      <tr key={sale._id || sale.id} className="hover:bg-slate-800/50">
-                        <td className="px-6 py-4 text-slate-100 whitespace-nowrap">{formatDate(sale.date)}</td>
-                        <td className="px-6 py-4 text-slate-300">
-                          <div className="space-y-1">
-                            {sale.products.map((product, idx) => (
-                              <div key={idx}>
-                                {product.productName} x {product.quantity}
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-emerald-300 font-semibold whitespace-nowrap">
-                          {formatCurrency(sale.totalRevenue)}
-                        </td>
-                        <td className="px-6 py-4 text-cyan-300 font-semibold whitespace-nowrap">
-                          {formatCurrency(sale.totalProfit)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEdit(sale)}
-                              className="rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-1.5 text-amber-100 transition hover:bg-amber-500/20"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(sale._id || sale.id)}
-                              className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-3 py-1.5 text-rose-100 transition hover:bg-rose-500/20"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {sales.map((sale, index) => {
+                      const displayNumber = sale.saleNumber ?? index + 1;
+                      return (
+                        <tr key={sale._id || sale.id} className="hover:bg-slate-800/50">
+                          <td className="px-6 py-4 text-slate-100 whitespace-nowrap">#{displayNumber}</td>
+                          <td className="px-6 py-4 text-slate-100 whitespace-nowrap">{formatDate(sale.date)}</td>
+                          <td className="px-6 py-4 text-slate-300">
+                            <div className="space-y-1">
+                              {sale.products.map((product, idx) => (
+                                <div key={idx}>
+                                  {product.productName} x {product.quantity}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-emerald-300 font-semibold whitespace-nowrap">
+                            {formatCurrency(sale.totalRevenue)}
+                          </td>
+                          <td className="px-6 py-4 text-cyan-300 font-semibold whitespace-nowrap">
+                            {formatCurrency(sale.totalProfit)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleEdit(sale)}
+                                className="rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-1.5 text-amber-100 transition hover:bg-amber-500/20"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDelete(sale._id || sale.id)}
+                                className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-3 py-1.5 text-rose-100 transition hover:bg-rose-500/20"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

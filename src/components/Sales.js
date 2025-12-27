@@ -9,6 +9,7 @@ const Sales = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([{ productId: "", quantity: "" }]);
   const [editSaleId, setEditSaleId] = useState(null);
+  const [saleDate, setSaleDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -101,20 +102,30 @@ const Sales = () => {
     // Calculate totals
     const { totalRevenue, totalProfit } = calculateSaleTotals(validProducts);
 
-    // Create sale record with product details
+    // Create sale record with product details; fail fast if a product was not found
     const saleProducts = validProducts.map((sp) => {
       const product = products.find((p) => p._id === sp.productId || p.id === parseInt(sp.productId));
+
+      if (!product) {
+        throw new Error('Selected product was not found. Please refresh the page and try again.');
+      }
+
       return {
         productId: sp.productId,
+        productNumber: product.productNumber || '',
+        brand: product.brand || '',
         productName: product.name,
+        category: product.category,
         quantity: parseInt(sp.quantity),
         sellingPrice: product.sellingPrice,
         costPrice: product.costPrice
       };
     });
 
+    const parsedDate = saleDate ? new Date(`${saleDate}T00:00:00`) : new Date();
+
     const newSale = {
-      date: new Date().toISOString(),
+      date: parsedDate.toISOString(),
       products: saleProducts,
       totalRevenue,
       totalProfit
@@ -128,6 +139,7 @@ const Sales = () => {
         await fetchSalesAndProducts();
         setEditSaleId(null);
         setSelectedProducts([{ productId: "", quantity: "" }]);
+        setSaleDate(new Date().toISOString().slice(0, 10));
         setShowForm(false);
         alert("Sale updated successfully!");
       } else {
@@ -148,12 +160,14 @@ const Sales = () => {
 
         // Reset form
         setSelectedProducts([{ productId: "", quantity: "" }]);
+        setSaleDate(new Date().toISOString().slice(0, 10));
         setShowForm(false);
         alert("Sale recorded successfully!");
       }
     } catch (error) {
       console.error('Error recording sale:', error);
-      alert('Failed to record sale. Please try again.');
+      const serverMessage = error.response?.data?.error || error.message || 'Unknown error';
+      alert(`Failed to record sale. ${serverMessage}`);
     }
   };
 
@@ -162,6 +176,7 @@ const Sales = () => {
     const rows = (sale.products || []).map((p) => ({ productId: p.productId, quantity: p.quantity }));
     setSelectedProducts(rows.length > 0 ? rows : [{ productId: "", quantity: "" }]);
     setEditSaleId(sale._id || sale.id);
+    setSaleDate(sale.date ? new Date(sale.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
     setShowForm(true);
   };
 
@@ -180,6 +195,7 @@ const Sales = () => {
   const handleCancel = () => {
     setShowForm(false);
     setSelectedProducts([{ productId: "", quantity: "" }]);
+    setSaleDate(new Date().toISOString().slice(0, 10));
   };
 
   const handleLogout = () => {
@@ -274,6 +290,19 @@ const Sales = () => {
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
               <h2 className="text-lg font-semibold text-slate-50 mb-4">Record New Sale</h2>
               <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Sale Date</label>
+                    <input
+                      type="date"
+                      value={saleDate}
+                      onChange={(e) => setSaleDate(e.target.value)}
+                      className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   {selectedProducts.map((sp, index) => (
                     <div key={index} className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">

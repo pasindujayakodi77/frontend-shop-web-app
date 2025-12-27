@@ -398,15 +398,23 @@ const Dashboard = () => {
                   {lists.recentSales.length === 0 && (
                     <p className="text-slate-400 text-sm">No sales recorded yet</p>
                   )}
-                  {lists.recentSales.map((sale) => (
-                    <div key={sale.id} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-100">Sale {sale.id}</p>
-                        <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
+                  {lists.recentSales.map((sale) => {
+                    const saleId = String(sale._id || sale.id || 'unknown');
+                    const orderLabel = sale.orderNumber || `#${saleId.slice(-4)}`;
+                    const productName = sale.productName || 'N/A';
+                    const category = sale.category || 'N/A';
+
+                    return (
+                      <div key={saleId} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-slate-100">Order {orderLabel}</p>
+                          <p className="text-xs text-slate-400">{productName} • {category}</p>
+                          <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
+                        </div>
+                        <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
                       </div>
-                      <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>

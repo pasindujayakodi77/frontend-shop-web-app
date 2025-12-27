@@ -9,6 +9,8 @@ const Inventory = () => {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
+    productNumber: "",
+    brand: "",
     category: "",
     quantity: "",
     costPrice: "",
@@ -47,6 +49,8 @@ const Inventory = () => {
     
     const productData = {
       name: formData.name,
+      productNumber: formData.productNumber,
+      brand: formData.brand,
       category: formData.category,
       quantity: parseInt(formData.quantity),
       costPrice: parseFloat(formData.costPrice),
@@ -69,6 +73,8 @@ const Inventory = () => {
       // Reset form
       setFormData({
         name: "",
+        productNumber: "",
+        brand: "",
         category: "",
         quantity: "",
         costPrice: "",
@@ -98,6 +104,8 @@ const Inventory = () => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
+      productNumber: product.productNumber || "",
+      brand: product.brand || "",
       category: product.category,
       quantity: product.quantity.toString(),
       costPrice: product.costPrice.toString(),
@@ -123,6 +131,8 @@ const Inventory = () => {
     setEditingProduct(null);
     setFormData({
       name: "",
+      productNumber: "",
+      brand: "",
       category: "",
       quantity: "",
       costPrice: "",
@@ -211,6 +221,30 @@ const Inventory = () => {
                 </div>
 
                 <div>
+                  <label className="block text-sm text-slate-300 mb-2">Product Number</label>
+                  <input
+                    type="text"
+                    name="productNumber"
+                    value={formData.productNumber}
+                    onChange={handleInputChange}
+                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    placeholder="e.g., SKU-1045"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Brand</label>
+                  <input
+                    type="text"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleInputChange}
+                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    placeholder="Enter brand name"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm text-slate-300 mb-2">Category</label>
                   <input
                     type="text"
@@ -295,6 +329,8 @@ const Inventory = () => {
                   <thead className="bg-slate-800/80 text-slate-300">
                     <tr>
                       <th className="px-6 py-3 text-left font-semibold">Name</th>
+                      <th className="px-6 py-3 text-left font-semibold">Product #</th>
+                      <th className="px-6 py-3 text-left font-semibold">Brand</th>
                       <th className="px-6 py-3 text-left font-semibold">Category</th>
                       <th className="px-6 py-3 text-left font-semibold">Quantity</th>
                       <th className="px-6 py-3 text-left font-semibold">Cost Price</th>
@@ -306,6 +342,8 @@ const Inventory = () => {
                     {products.map((product) => (
                       <tr key={product._id || product.id} className="hover:bg-slate-800/50">
                         <td className="px-6 py-3 text-slate-100">{product.name}</td>
+                        <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
+                        <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
                         <td className="px-6 py-3 text-slate-300">{product.category}</td>
                         <td className="px-6 py-3 text-slate-300">{product.quantity}</td>
                         <td className="px-6 py-3 text-slate-300">LKR {product.costPrice.toFixed(2)}</td>

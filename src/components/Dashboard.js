@@ -196,6 +196,11 @@ const Dashboard = () => {
     window.location.href = "/login";
   };
 
+  const truncate = (text, max = 20) => {
+    if (!text) return text;
+    return text.length > max ? text.slice(0, max - 1) + '…' : text;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -400,15 +405,16 @@ const Dashboard = () => {
                   )}
                   {lists.recentSales.map((sale) => {
                     const saleId = String(sale._id || sale.id || 'unknown');
-                    const orderLabel = sale.orderNumber || `#${saleId.slice(-4)}`;
-                    const productName = sale.productName || 'N/A';
-                    const category = sale.category || 'N/A';
+                    const saleNumber = sale.saleNumber ? `#${sale.saleNumber}` : (sale.orderNumber || `#${saleId.slice(-4)}`);
+                    const customerName = sale.customerName || sale.sellerName || sale.customer?.name || '-';
+                    const sellingMethod = (sale.sellingMethod || 'pos');
+                    const sellingMethodLabel = sellingMethod.charAt(0).toUpperCase() + sellingMethod.slice(1);
 
                     return (
                       <div key={saleId} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold text-slate-100">Order {orderLabel}</p>
-                          <p className="text-xs text-slate-400">{productName} • {category}</p>
+                          <p className="text-sm font-semibold text-slate-100">Sale {saleNumber}</p>
+                          <p className="text-xs text-slate-400" title={customerName}>{truncate(customerName, 24)} • {sellingMethodLabel}</p>
                           <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
                         </div>
                         <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>

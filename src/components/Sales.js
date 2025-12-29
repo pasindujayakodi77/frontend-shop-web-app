@@ -11,6 +11,7 @@ const Sales = () => {
   const [editSaleId, setEditSaleId] = useState(null);
   const [saleDate, setSaleDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [sellingMethod, setSellingMethod] = useState('pos');
+  const [customerName, setCustomerName] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -130,7 +131,8 @@ const Sales = () => {
       products: saleProducts,
       totalRevenue,
       totalProfit,
-      sellingMethod
+      sellingMethod,
+      customerName
     };
 
     try {
@@ -153,8 +155,8 @@ const Sales = () => {
           sellingPrice: p.sellingPrice
         }));
 
-        // include sellingMethod and date when calling add
-        await salesAPI.add(productsPayload, { sellingMethod, date: newSale.date });
+        // include sellingMethod, date and customerName when calling add
+        await salesAPI.add(productsPayload, { sellingMethod, date: newSale.date, customerName });
 
         // Refresh data from backend
         await fetchSalesAndProducts();
@@ -163,6 +165,7 @@ const Sales = () => {
         setSelectedProducts([{ productId: "", quantity: "" }]);
         setSaleDate(new Date().toISOString().slice(0, 10));
         setSellingMethod('pos');
+        setCustomerName('');
         setShowForm(false);
         alert("Sale recorded successfully!");
       }
@@ -180,6 +183,7 @@ const Sales = () => {
     setEditSaleId(sale._id || sale.id);
     setSaleDate(sale.date ? new Date(sale.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
     setSellingMethod(sale.sellingMethod || 'pos');
+    setCustomerName(sale.customerName || '');
     setShowForm(true);
   };
 
@@ -200,6 +204,8 @@ const Sales = () => {
     setSelectedProducts([{ productId: "", quantity: "" }]);
     setSaleDate(new Date().toISOString().slice(0, 10));
     setSellingMethod('pos');
+    setCustomerName('');
+    setEditSaleId(null);
   };
 
   const handleLogout = () => {
@@ -283,7 +289,17 @@ const Sales = () => {
               <p className="text-sm text-slate-400">Log sales, track revenue, and stay on stock.</p>
             </div>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                if (!showForm) {
+                  // preparing a fresh form for new sale
+                  setEditSaleId(null);
+                  setSelectedProducts([{ productId: "", quantity: "" }]);
+                  setSaleDate(new Date().toISOString().slice(0, 10));
+                  setSellingMethod('pos');
+                  setCustomerName('');
+                }
+                setShowForm(!showForm);
+              }}
               className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
             >
               {showForm ? "Cancel" : "Record New Sale"}
@@ -317,6 +333,16 @@ const Sales = () => {
                       <option value="web">Web</option>
                       <option value="wholesale">Wholesale</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-300 mb-2">Customer Name</label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Customer name (optional)"
+                      className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    />
                   </div>
                 </div>
 
@@ -410,6 +436,7 @@ const Sales = () => {
                       <th className="px-6 py-3 text-left font-semibold">Sale #</th>
                       <th className="px-6 py-3 text-left font-semibold">Date</th>
                       <th className="px-6 py-3 text-left font-semibold">Method</th>
+                      <th className="px-6 py-3 text-left font-semibold">Customer</th>
                       <th className="px-6 py-3 text-left font-semibold">Products</th>
                       <th className="px-6 py-3 text-left font-semibold">Total Revenue</th>
                       <th className="px-6 py-3 text-left font-semibold">Total Profit</th>
@@ -424,6 +451,7 @@ const Sales = () => {
                           <td className="px-6 py-4 text-slate-100 whitespace-nowrap">#{displayNumber}</td>
                           <td className="px-6 py-4 text-slate-100 whitespace-nowrap">{formatDate(sale.date)}</td>
                           <td className="px-6 py-4 text-slate-300 whitespace-nowrap">{(sale.sellingMethod || 'pos').charAt(0).toUpperCase() + (sale.sellingMethod || 'pos').slice(1)}</td>
+                          <td className="px-6 py-4 text-slate-300 whitespace-nowrap">{sale.customerName || '-'}</td>
                           <td className="px-6 py-4 text-slate-300">
                             <div className="space-y-1">
                               {sale.products.map((product, idx) => (

@@ -64,12 +64,13 @@ export const salesAPI = {
 
   // Log a sale and update inventory on the backend (uses /sales/add)
   // productsArray: [{ productId, quantity, sellingPrice }]
-  // options: { sellingMethod: 'web'|'pos'|'wholesale', date: ISOString }
+  // options: { sellingMethod: 'web'|'pos'|'wholesale', date: ISOString, customerName: string }
   add: async (productsArray, options = {}) => {
     try {
       const payload = { products: productsArray };
       if (options.sellingMethod) payload.sellingMethod = options.sellingMethod;
       if (options.date) payload.date = options.date;
+      if (options.customerName) payload.customerName = options.customerName;
       const response = await axiosInstance.post('/sales/add', payload);
       return response.data;
     } catch (error) {

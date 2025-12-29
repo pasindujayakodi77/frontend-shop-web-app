@@ -1,38 +1,29 @@
 import axios from 'axios';
 
-// Normalize base URL: drop trailing slashes, then append /api so env can be just the host
-const API_URL = `${(process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/+$/, '')}/api`;
+// Build API base URL safely
+const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/+$/, '') + '/api';
 
-console.log('=== API Configuration ===');
-console.log('REACT_APP_API_URL env var:', process.env.REACT_APP_API_URL);
-console.log('Final API_URL:', API_URL);
-console.log('========================');
+// Minimal logging
+if (typeof console !== 'undefined') {
+  console.log('Final API_URL:', API_URL);
+}
 
-// Get token from localStorage
-const getAuthToken = () => {
+function getAuthToken() {
   return localStorage.getItem('token');
-};
+}
 
-// Get userId from localStorage
-const getUserId = () => {
-  return localStorage.getItem('userId');
-};
+const axiosInstance = axios.create({ baseURL: API_URL });
 
-// Set up axios defaults
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-});
-
-// Add token to requests
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getAuthToken();
+  function (config) {
+    var token = getAuthToken();
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = config.headers || {};
+      config.headers.Authorization = 'Bearer ' + token;
     }
     return config;
   },
-  (error) => {
+  function (error) {
     return Promise.reject(error);
   }
 );
@@ -64,13 +55,14 @@ export const salesAPI = {
   // Log a sale and update inventory on the backend (uses /sales/add)
   // productsArray: [{ productId, quantity, sellingPrice }]
   // options: { sellingMethod: 'web'|'pos'|'wholesale', date: ISOString, customerName: string }
-  add: async (productsArray, options = {}) => {
+  add: async function (productsArray, options) {
+    options = options || {};
     try {
-      const payload = { products: productsArray };
+      var payload = { products: productsArray };
       if (options.sellingMethod) payload.sellingMethod = options.sellingMethod;
       if (options.date) payload.date = options.date;
       if (options.customerName) payload.customerName = options.customerName;
-      const response = await axiosInstance.post('/sales/add', payload);
+      var response = await axiosInstance.post('/sales/add', payload);
       return response.data;
     } catch (error) {
       console.error('Error adding/logging sale:', error);

@@ -395,7 +395,7 @@ const Dashboard = () => {
                             <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
                           </div>
                           <div>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-semibold">
                               {pct.toFixed(0)}%
                             </span>
                           </div>
@@ -431,7 +431,7 @@ const Dashboard = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">Paid</span>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-semibold">Paid</span>
                         </div>
                       </div>
                     );

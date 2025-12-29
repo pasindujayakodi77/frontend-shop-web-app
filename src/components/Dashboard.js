@@ -382,15 +382,23 @@ const Dashboard = () => {
                   {lists.topProducts.length === 0 && (
                     <p className="text-slate-400 text-sm">No product sales yet</p>
                   )}
-                  {lists.topProducts.map((product) => (
-                    <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-100">{product.name}</p>
-                        <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
-                      </div>
-                      <div className="text-sm text-slate-200">{product.sellingPrice ? `LKR ${product.sellingPrice}` : ""}</div>
-                    </div>
-                  ))}
+                  {(() => {
+                    const items = lists.topProducts || [];
+                    const totalRevenue = items.reduce((s, p) => s + ((p.quantity || 0) * (p.sellingPrice || 0)), 0);
+                    return items.map((product) => {
+                      const pct = totalRevenue ? ((product.quantity * (product.sellingPrice || 0)) / totalRevenue) * 100 : 0;
+                      return (
+                        <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                          <div>
+                            <p className="text-xs text-slate-400">{product.productNumber || '-'}</p>
+                            <p className="text-sm font-semibold text-slate-100">{product.name}</p>
+                            <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
+                          </div>
+                          <div className="text-sm text-slate-50 font-semibold">{pct.toFixed(0)}%</div>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
 

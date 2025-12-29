@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setUserData } from "../utils/auth";
 
-// Use environment variable for API URL (fallback to localhost) and normalize trailing slash
-const API_URL = `${(process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/+$/, "")}/api`;
+// Use environment variable for API URL; fallback to relative `/api` in deploys
+const API_URL = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '') + '/api'
+  : '/api';
 
 const CategorySelection = () => {
   const [selectedCategory, setSelectedCategory] = useState("");

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
-// Use environment variable for API URL (fallback to localhost) and normalize trailing slash
-const API_URL = `${(process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/+$/, "")}/api`;
+// Use environment variable for API URL; fallback to relative `/api` in deploys
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL.replace(/\/+$/, "")}/api`
+  : "/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "", shopCategory: "" });

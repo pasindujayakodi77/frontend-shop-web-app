@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// Build API base URL safely
-const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/+$/, '') + '/api';
+// Build API base URL safely. If REACT_APP_API_URL is not set (e.g. in some deploys),
+// fall back to a relative `/api` so calls go to the same origin.
+const API_URL = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '') + '/api'
+  : '/api';
 
 // Minimal logging
 if (typeof console !== 'undefined') {

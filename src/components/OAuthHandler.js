@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL
+  ? process.env.REACT_APP_API_URL.replace(/\/+$/, '') + '/api'
+  : '/api';
 
 // Handles OAuth redirect from backend; stores token/userId then routes appropriately
 const OAuthHandler = () => {

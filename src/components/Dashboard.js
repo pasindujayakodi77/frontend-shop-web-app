@@ -390,11 +390,15 @@ const Dashboard = () => {
                       return (
                         <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
                           <div>
-                            <p className="text-xs text-slate-400">{product.productNumber || '-'}</p>
                             <p className="text-sm font-semibold text-slate-100">{product.name}</p>
+                            <p className="text-xs text-slate-400">{product.productNumber || '-'}</p>
                             <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
                           </div>
-                          <div className="text-sm text-slate-50 font-semibold">{pct.toFixed(0)}%</div>
+                          <div>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">
+                              {pct.toFixed(0)}%
+                            </span>
+                          </div>
                         </div>
                       );
                     });
@@ -425,7 +429,10 @@ const Dashboard = () => {
                           <p className="text-xs text-slate-400" title={customerName}>{truncate(customerName, 24)} • {sellingMethodLabel}</p>
                           <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
                         </div>
-                        <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-xs font-semibold">Paid</span>
+                        </div>
                       </div>
                     );
                   })}

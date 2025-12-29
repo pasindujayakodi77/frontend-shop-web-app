@@ -12,6 +12,7 @@ const Sales = () => {
   const [saleDate, setSaleDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [sellingMethod, setSellingMethod] = useState('pos');
   const [customerName, setCustomerName] = useState('');
+  const [barcodeInput, setBarcodeInput] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -211,6 +212,7 @@ const Sales = () => {
     setSellingMethod('pos');
     setCustomerName('');
     setEditSaleId(null);
+    setBarcodeInput('');
   };
 
   const handleLogout = () => {
@@ -232,6 +234,50 @@ const Sales = () => {
 
   const formatCurrency = (amount) => {
     return `LKR ${amount.toFixed(2)}`;
+  };
+
+  // Handle barcode scans/entries to add products quickly
+  const handleBarcodeSubmit = async (e) => {
+    e.preventDefault();
+    const code = barcodeInput.trim();
+    if (!code) return;
+
+    try {
+      const response = await productsAPI.getByBarcode(code);
+      const product = response.product || response;
+
+      if (!product?._id && !product?.id) {
+        throw new Error('Product not found for this barcode');
+      }
+
+      const productId = product._id || product.id;
+
+      setProducts((prev) => {
+        const exists = prev.some((p) => (p._id || p.id) === productId);
+        return exists ? prev : [...prev, product];
+      });
+
+      setSelectedProducts((prev) => {
+        const idx = prev.findIndex((p) => p.productId === productId);
+        if (idx >= 0) {
+          const updated = [...prev];
+          const currentQty = parseInt(updated[idx].quantity || '0', 10) || 0;
+          updated[idx] = { ...updated[idx], quantity: (currentQty + 1).toString() };
+          return updated;
+        }
+        return [...prev, { productId, quantity: '1' }];
+      });
+
+      if (!showForm) {
+        setShowForm(true);
+      }
+    } catch (err) {
+      console.error('Barcode lookup failed:', err);
+      const message = err.response?.data?.error || err.message || 'Unable to find product for this barcode';
+      alert(message);
+    } finally {
+      setBarcodeInput('');
+    }
   };
 
   if (loading) {
@@ -315,6 +361,31 @@ const Sales = () => {
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
               <h2 className="text-lg font-semibold text-slate-50 mb-4">Record New Sale</h2>
               <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm text-slate-300 mb-2">Barcode Scan</label>
+                    <input
+                      type="text"
+                      value={barcodeInput}
+                      onChange={(e) => setBarcodeInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleBarcodeSubmit(e);
+                        }
+                      }}
+                      placeholder="Scan barcode to add product"
+                      className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBarcodeSubmit}
+                    className="sm:mt-[26px] inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+                  >
+                    Add via Barcode
+                  </button>
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm text-slate-300 mb-2">Sale Date</label>

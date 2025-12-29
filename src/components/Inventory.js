@@ -15,6 +15,7 @@ const Inventory = () => {
   const [formData, setFormData] = useState({
     name: "",
     productNumber: "",
+    barcode: "",
     brand: "",
     category: "",
     quantity: "",
@@ -81,9 +82,13 @@ const Inventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const trimmedBarcode = formData.barcode.trim();
+    const trimmedProductNumber = formData.productNumber.trim();
+
     const productData = {
       name: formData.name,
-      productNumber: formData.productNumber,
+      productNumber: trimmedProductNumber === "" ? undefined : trimmedProductNumber,
+      barcode: trimmedBarcode === "" ? undefined : trimmedBarcode,
       brand: formData.brand,
       category: formData.category,
       quantity: parseInt(formData.quantity, 10),
@@ -107,6 +112,7 @@ const Inventory = () => {
       setFormData({
         name: "",
         productNumber: "",
+        barcode: "",
         brand: "",
         category: "",
         quantity: "",
@@ -136,6 +142,7 @@ const Inventory = () => {
     setFormData({
       name: product.name,
       productNumber: product.productNumber || "",
+      barcode: product.barcode || "",
       brand: product.brand || "",
       category: product.category,
       quantity: product.quantity.toString(),
@@ -166,6 +173,7 @@ const Inventory = () => {
     setFormData({
       name: "",
       productNumber: "",
+      barcode: "",
       brand: "",
       category: "",
       quantity: "",
@@ -370,6 +378,18 @@ const Inventory = () => {
                 </div>
 
                 <div>
+                  <label className="block text-sm text-slate-300 mb-2">Barcode</label>
+                  <input
+                    type="text"
+                    name="barcode"
+                    value={formData.barcode}
+                    onChange={handleInputChange}
+                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    placeholder="Scan or enter barcode"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm text-slate-300 mb-2">Brand</label>
                   <input
                     type="text"
@@ -487,6 +507,7 @@ const Inventory = () => {
                         <tr>
                           <th className="px-6 py-3 text-left font-semibold">Name</th>
                           <th className="px-6 py-3 text-left font-semibold">Product #</th>
+                          <th className="px-6 py-3 text-left font-semibold">Barcode</th>
                           <th className="px-6 py-3 text-left font-semibold">Brand</th>
                           <th className="px-6 py-3 text-left font-semibold">Category</th>
                           <th className="px-6 py-3 text-left font-semibold">Quantity</th>
@@ -507,6 +528,7 @@ const Inventory = () => {
                             >
                               <td className="px-6 py-3 text-slate-100">{product.name}</td>
                               <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
+                              <td className="px-6 py-3 text-slate-300">{product.barcode || "-"}</td>
                               <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
                               <td className="px-6 py-3 text-slate-300">{product.category}</td>
                               <td className={`px-6 py-3 ${isLowStock ? 'text-amber-300 font-semibold' : 'text-slate-300'}`}>{product.quantity}</td>

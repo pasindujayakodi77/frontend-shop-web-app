@@ -228,6 +228,17 @@ export const productsAPI = {
       console.error('Error fetching low stock products:', error);
       throw error;
     }
+  },
+
+  // Find a product by barcode or product number (for scanners)
+  getByBarcode: async (code) => {
+    try {
+      const response = await axiosInstance.get(`/products/barcode/${encodeURIComponent(code)}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching product by barcode:', error);
+      throw error;
+    }
   }
 };
 

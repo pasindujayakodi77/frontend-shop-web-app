@@ -62,6 +62,22 @@ export const salesAPI = {
     }
   },
 
+  // Log a sale and update inventory on the backend (uses /sales/add)
+  // productsArray: [{ productId, quantity, sellingPrice }]
+  // options: { sellingMethod: 'web'|'pos'|'wholesale', date: ISOString }
+  add: async (productsArray, options = {}) => {
+    try {
+      const payload = { products: productsArray };
+      if (options.sellingMethod) payload.sellingMethod = options.sellingMethod;
+      if (options.date) payload.date = options.date;
+      const response = await axiosInstance.post('/sales/add', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding/logging sale:', error);
+      throw error;
+    }
+  },
+
   // Update a sale
   update: async (saleId, saleData) => {
     try {

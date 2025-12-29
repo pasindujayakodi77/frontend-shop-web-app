@@ -55,10 +55,8 @@ const LandingPage = () => {
 				<header className="sticky top-0 z-20 -mx-6 mb-12 bg-slate-950/80 backdrop-blur">
 					<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
 						<div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-							<span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-slate-950 font-bold shadow-lg shadow-sky-500/30">
-								Nova
-							</span>
-							<span className="text-slate-100">Nova Retail OS</span>
+							
+							<span className="text-slate-100">Shop Flow</span>
 						</div>
 						<nav className="hidden items-center gap-8 text-sm font-medium text-slate-200 md:flex">
 							<a href="/#features" className="transition-colors hover:text-sky-300">

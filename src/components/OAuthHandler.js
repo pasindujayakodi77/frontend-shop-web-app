@@ -46,6 +46,7 @@ const OAuthHandler = () => {
 
       // Prefer authoritative profile check to avoid skipping category selection incorrectly
       let categoryFromProfile = null;
+      let categoryCompleted = false;
       if (token) {
         try {
           const profileRes = await fetch(`${API_URL}/auth/me`, {
@@ -56,7 +57,14 @@ const OAuthHandler = () => {
           });
           if (profileRes.ok) {
             const profile = await profileRes.json();
-            categoryFromProfile = profile.shopCategory || profile.category || null;
+            const userProfile = profile?.user || profile;
+            categoryFromProfile = userProfile?.shopCategory || userProfile?.category || null;
+            categoryCompleted = !!userProfile?.isCategorySelected;
+
+            // Backfill userId if the query param was missing
+            if (!userId && userProfile?._id) {
+              localStorage.setItem("userId", userProfile._id);
+            }
           }
         } catch (profileErr) {
           console.warn("Profile lookup failed; falling back to query params", profileErr);
@@ -65,7 +73,7 @@ const OAuthHandler = () => {
 
       const resolvedCategory = categoryFromProfile || shopCategory;
       const hasCategory = !!resolvedCategory && resolvedCategory !== "null" && resolvedCategory !== "undefined";
-      const hasCompletedCategory = hasCompletedCategoryParam || !!categoryFromProfile;
+      const hasCompletedCategory = hasCompletedCategoryParam || categoryCompleted || !!categoryFromProfile;
 
       if (hasCategory && hasCompletedCategory) {
         navigate("/dashboard", { replace: true });

@@ -216,6 +216,18 @@ export const productsAPI = {
       console.error('Error fetching product history:', error);
       throw error;
     }
+  },
+
+  // Get products that are at or below their low-stock threshold
+  getLowStock: async (threshold) => {
+    try {
+      const params = typeof threshold === 'number' ? { threshold } : undefined;
+      const response = await axiosInstance.get('/products/low-stock', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching low stock products:', error);
+      throw error;
+    }
   }
 };
 

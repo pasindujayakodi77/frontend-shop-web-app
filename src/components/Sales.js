@@ -156,7 +156,7 @@ const Sales = () => {
         }));
 
         // include sellingMethod, date and customerName when calling add
-        await salesAPI.add(productsPayload, { sellingMethod, date: newSale.date, customerName });
+        const saleResponse = await salesAPI.add(productsPayload, { sellingMethod, date: newSale.date, customerName });
 
         // Refresh data from backend
         await fetchSalesAndProducts();
@@ -167,7 +167,12 @@ const Sales = () => {
         setSellingMethod('pos');
         setCustomerName('');
         setShowForm(false);
-        alert("Sale recorded successfully!");
+        if (saleResponse?.lowStockAlerts?.length) {
+          const names = saleResponse.lowStockAlerts.map((p) => `${p.name} (qty ${p.quantity}/${p.threshold})`).join(', ');
+          alert(`Sale recorded. Low stock alert for: ${names}`);
+        } else {
+          alert("Sale recorded successfully!");
+        }
       }
     } catch (error) {
       console.error('Error recording sale:', error);

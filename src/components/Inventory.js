@@ -5,10 +5,12 @@ import { productsAPI } from "../utils/api";
 const Inventory = () => {
   const [products, setProducts] = useState([]);
   const [history, setHistory] = useState([]);
+  const [lowStock, setLowStock] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [lowStockLoading, setLowStockLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [formData, setFormData] = useState({
     name: "",
@@ -17,13 +19,15 @@ const Inventory = () => {
     category: "",
     quantity: "",
     costPrice: "",
-    sellingPrice: ""
+    sellingPrice: "",
+    lowStockThreshold: "5"
   });
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
     fetchHistory();
+    fetchLowStock();
   }, []);
 
   const fetchProducts = async () => {
@@ -55,6 +59,20 @@ const Inventory = () => {
     }
   };
 
+  const fetchLowStock = async () => {
+    try {
+      setLowStockLoading(true);
+      const data = await productsAPI.getLowStock();
+      const lowStockArray = data.products || data;
+      setLowStock(Array.isArray(lowStockArray) ? lowStockArray : []);
+    } catch (error) {
+      console.error("Error fetching low stock products:", error);
+      setLowStock([]);
+    } finally {
+      setLowStockLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -70,7 +88,8 @@ const Inventory = () => {
       category: formData.category,
       quantity: parseInt(formData.quantity, 10),
       costPrice: parseFloat(formData.costPrice),
-      sellingPrice: parseFloat(formData.sellingPrice)
+      sellingPrice: parseFloat(formData.sellingPrice),
+      lowStockThreshold: formData.lowStockThreshold === "" ? undefined : parseFloat(formData.lowStockThreshold)
     };
 
     try {
@@ -83,6 +102,7 @@ const Inventory = () => {
 
       await fetchProducts();
       await fetchHistory();
+      await fetchLowStock();
 
       setFormData({
         name: "",
@@ -91,7 +111,8 @@ const Inventory = () => {
         category: "",
         quantity: "",
         costPrice: "",
-        sellingPrice: ""
+        sellingPrice: "",
+        lowStockThreshold: "5"
       });
       setShowForm(false);
     } catch (error) {
@@ -119,7 +140,8 @@ const Inventory = () => {
       category: product.category,
       quantity: product.quantity.toString(),
       costPrice: product.costPrice.toString(),
-      sellingPrice: product.sellingPrice.toString()
+      sellingPrice: product.sellingPrice.toString(),
+      lowStockThreshold: (product.lowStockThreshold ?? 5).toString()
     });
     setShowForm(true);
   };
@@ -130,6 +152,7 @@ const Inventory = () => {
         await productsAPI.delete(id);
         await fetchProducts();
         await fetchHistory();
+        await fetchLowStock();
       } catch (error) {
         console.error("Error deleting product:", error);
         alert("Failed to delete product. Please try again.");
@@ -147,7 +170,8 @@ const Inventory = () => {
       category: "",
       quantity: "",
       costPrice: "",
-      sellingPrice: ""
+      sellingPrice: "",
+      lowStockThreshold: "5"
     });
   };
 
@@ -282,6 +306,40 @@ const Inventory = () => {
             </div>
           </div>
 
+          {lowStockLoading ? (
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300">Checking stock levels...</div>
+          ) : lowStock.length > 0 ? (
+            <div className="rounded-2xl border border-amber-400/40 bg-amber-500/10 backdrop-blur-xl p-4 shadow-[0_18px_80px_-45px_rgba(251,191,36,0.35)] ring-1 ring-amber-300/30">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.15em] text-amber-200/80">Low stock alert</p>
+                  <h3 className="text-lg font-semibold text-amber-50">{lowStock.length} product{lowStock.length === 1 ? "" : "s"} need restock</h3>
+                  <p className="text-sm text-amber-100/80">Restock these items before they run out.</p>
+                </div>
+                <div className="rounded-xl bg-amber-400/20 px-3 py-2 text-xs font-semibold text-amber-900">
+                  Threshold per item
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {lowStock.slice(0, 6).map((item) => {
+                  const threshold = item.lowStockThreshold ?? 5;
+                  return (
+                    <div key={item._id || item.id} className="rounded-xl border border-amber-300/40 bg-amber-400/5 px-4 py-3 text-sm text-amber-50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold">{item.name}</p>
+                          <p className="text-amber-100/80">Qty: {item.quantity}</p>
+                        </div>
+                        <span className="rounded-full bg-amber-300/20 px-3 py-1 text-xs font-semibold text-amber-900">Threshold {threshold}</span>
+                      </div>
+                      <p className="text-amber-100/70 text-xs mt-1">Category: {item.category || "N/A"}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
           {showForm && (
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
               <h3 className="text-lg font-semibold text-slate-50 mb-4">{editingProduct ? "Edit Product" : "Add New Product"}</h3>
@@ -347,6 +405,20 @@ const Inventory = () => {
                     min="0"
                     className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
                     placeholder="Enter quantity"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-300 mb-2">Low Stock Threshold</label>
+                  <input
+                    type="number"
+                    name="lowStockThreshold"
+                    value={formData.lowStockThreshold}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="1"
+                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
+                    placeholder="Alert me at quantity"
                   />
                 </div>
 
@@ -418,37 +490,46 @@ const Inventory = () => {
                           <th className="px-6 py-3 text-left font-semibold">Brand</th>
                           <th className="px-6 py-3 text-left font-semibold">Category</th>
                           <th className="px-6 py-3 text-left font-semibold">Quantity</th>
+                          <th className="px-6 py-3 text-left font-semibold">Threshold</th>
                           <th className="px-6 py-3 text-left font-semibold">Cost Price</th>
                           <th className="px-6 py-3 text-left font-semibold">Selling Price</th>
                           <th className="px-6 py-3 text-left font-semibold">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/70">
-                        {displayedProducts.map((product) => (
-                          <tr key={product._id || product.id} className="hover:bg-slate-800/50">
-                            <td className="px-6 py-3 text-slate-100">{product.name}</td>
-                            <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
-                            <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
-                            <td className="px-6 py-3 text-slate-300">{product.category}</td>
-                            <td className="px-6 py-3 text-slate-300">{product.quantity}</td>
-                            <td className="px-6 py-3 text-slate-300">LKR {product.costPrice.toFixed(2)}</td>
-                            <td className="px-6 py-3 text-slate-300">LKR {product.sellingPrice.toFixed(2)}</td>
-                            <td className="px-6 py-3 flex gap-3 text-slate-200">
-                              <button
-                                onClick={() => handleEdit(product)}
-                                className="text-cyan-300 transition hover:text-cyan-200"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(product._id || product.id)}
-                                className="text-rose-300 transition hover:text-rose-200"
-                              >
-                                Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {displayedProducts.map((product) => {
+                          const threshold = product.lowStockThreshold ?? 5;
+                          const isLowStock = product.quantity <= threshold;
+                          return (
+                            <tr
+                              key={product._id || product.id}
+                              className={`hover:bg-slate-800/50 ${isLowStock ? 'bg-amber-500/5' : ''}`}
+                            >
+                              <td className="px-6 py-3 text-slate-100">{product.name}</td>
+                              <td className="px-6 py-3 text-slate-300">{product.productNumber || "-"}</td>
+                              <td className="px-6 py-3 text-slate-300">{product.brand || "-"}</td>
+                              <td className="px-6 py-3 text-slate-300">{product.category}</td>
+                              <td className={`px-6 py-3 ${isLowStock ? 'text-amber-300 font-semibold' : 'text-slate-300'}`}>{product.quantity}</td>
+                              <td className="px-6 py-3 text-slate-300">{threshold}</td>
+                              <td className="px-6 py-3 text-slate-300">LKR {product.costPrice.toFixed(2)}</td>
+                              <td className="px-6 py-3 text-slate-300">LKR {product.sellingPrice.toFixed(2)}</td>
+                              <td className="px-6 py-3 flex gap-3 text-slate-200">
+                                <button
+                                  onClick={() => handleEdit(product)}
+                                  className="text-cyan-300 transition hover:text-cyan-200"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(product._id || product.id)}
+                                  className="text-rose-300 transition hover:text-rose-200"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

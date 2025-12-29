@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Use environment variable if available, otherwise default to localhost
-// If your backend doesn't use /api prefix, change this to 'http://localhost:5000'
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Normalize base URL: drop trailing slashes, then append /api so env can be just the host
+const API_URL = `${(process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/+$/, '')}/api`;
 
 console.log('=== API Configuration ===');
 console.log('REACT_APP_API_URL env var:', process.env.REACT_APP_API_URL);

@@ -25,8 +25,8 @@ ChartJS.register(
   Legend
 );
 
-// Use environment variable for API URL
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+// Use environment variable for API URL (fallback to localhost) and normalize trailing slash
+const API_URL = `${(process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/+$/, "")}/api`;
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);

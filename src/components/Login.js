@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-// Use environment variable for API URL
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+// Use environment variable for API URL (fallback to localhost) and normalize trailing slash
+const API_URL = `${(process.env.REACT_APP_API_URL || "http://localhost:5000").replace(/\/+$/, "")}/api`;
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });

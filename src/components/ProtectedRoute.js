@@ -12,21 +12,15 @@ const ProtectedRoute = ({ children }) => {
 
   const checkAuth = () => {
     const token = checkAuthToken();
-    let guest = isGuestMode();
-
-    // If user came via guest CTA, set flag and allow
-    if (!token && !guest && location.state?.guest) {
+    
+    if (token) {
+      // User is authenticated with a real token
+      setIsAuthenticated(true);
+    } else {
+      // No token - enable guest mode for exploration
       localStorage.setItem("guest_mode", "true");
-      guest = true;
+      setIsAuthenticated(true); // Allow access as guest
     }
-
-    // Fallback: allow guest mode for unauthenticated visitors so they can explore
-    if (!token && !guest) {
-      localStorage.setItem("guest_mode", "true");
-      guest = true;
-    }
-
-    setIsAuthenticated(token || guest);
   };
 
   // Show loading state while checking authentication

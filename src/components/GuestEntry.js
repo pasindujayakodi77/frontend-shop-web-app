@@ -7,7 +7,7 @@ const GuestEntry = () => {
 
   useEffect(() => {
     localStorage.setItem("guest_mode", "true");
-    navigate("/dashboard", { replace: true });
+    navigate("/dashboard", { replace: true, state: { guest: true } });
   }, [navigate]);
 
   return null;

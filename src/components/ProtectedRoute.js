@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { isAuthenticated as checkAuthToken, isGuestMode } from "../utils/auth";
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [location.state]);
 
   const checkAuth = () => {
     const token = checkAuthToken();
-    const guest = isGuestMode();
+    let guest = isGuestMode();
+
+    // If user came via guest CTA, set flag and allow
+    if (!token && !guest && location.state?.guest) {
+      localStorage.setItem("guest_mode", "true");
+      guest = true;
+    }
+
     setIsAuthenticated(token || guest);
   };
 

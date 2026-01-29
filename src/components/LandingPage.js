@@ -48,7 +48,7 @@ const LandingPage = () => {
 
 	const handleGuestDemo = () => {
 		localStorage.setItem("guest_mode", "true");
-		navigate("/dashboard");
+		navigate("/dashboard", { state: { guest: true } });
 	};
 	return (
 		<div className="min-h-screen bg-[#050506] text-gray-100">

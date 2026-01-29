@@ -319,7 +319,7 @@ const Inventory = () => {
                   <h3 className="text-lg font-semibold text-amber-50">{lowStock.length} product{lowStock.length === 1 ? "" : "s"} need restock</h3>
                   <p className="text-sm text-amber-100/80">Restock these items before they run out.</p>
                 </div>
-                <div className="rounded-xl bg-amber-400/20 px-3 py-2 text-xs font-semibold text-amber-900">
+                <div className="rounded-xl bg-amber-400/20 px-3 py-2 text-xs font-semibold text-amber-50">
                   Threshold per item
                 </div>
               </div>
@@ -333,7 +333,7 @@ const Inventory = () => {
                           <p className="font-semibold">{item.name}</p>
                           <p className="text-amber-100/80">Qty: {item.quantity}</p>
                         </div>
-                        <span className="rounded-full bg-amber-300/20 px-3 py-1 text-xs font-semibold text-amber-900">Threshold {threshold}</span>
+                        <span className="rounded-full bg-amber-300/20 px-3 py-1 text-xs font-semibold text-amber-50">Threshold {threshold}</span>
                       </div>
                       <p className="text-amber-100/70 text-xs mt-1">Category: {item.category || "N/A"}</p>
                     </div>

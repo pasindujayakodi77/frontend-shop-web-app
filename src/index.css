@@ -46,18 +46,18 @@ body {
 
 	.btn-ghost {
 		@apply inline-flex items-center justify-center rounded-lg;
-		@apply border border-white/10 bg-transparent;
-		@apply px-3 py-1.5 text-sm font-semibold text-gray-200;
-		@apply transition hover:border-white/25 hover:bg-white/5;
-		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300;
+		@apply border border-cyan-400/50 bg-cyan-500/10;
+		@apply px-3 py-1.5 text-sm font-semibold text-cyan-100;
+		@apply transition hover:border-cyan-300 hover:bg-cyan-500/20;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300;
 	}
 
 	.btn-danger {
 		@apply inline-flex items-center justify-center rounded-lg;
-		@apply border border-rose-400/60 bg-rose-500/10;
-		@apply px-3 py-1.5 text-sm font-semibold text-rose-100;
-		@apply transition hover:bg-rose-500/20;
-		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300;
+		@apply border border-rose-500/70 bg-rose-500/90;
+		@apply px-3 py-1.5 text-sm font-semibold text-white;
+		@apply transition hover:bg-rose-500;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-200;
 	}
 
 a {

@@ -20,6 +20,12 @@ const ProtectedRoute = ({ children }) => {
       guest = true;
     }
 
+    // Fallback: allow guest mode for unauthenticated visitors so they can explore
+    if (!token && !guest) {
+      localStorage.setItem("guest_mode", "true");
+      guest = true;
+    }
+
     setIsAuthenticated(token || guest);
   };
 

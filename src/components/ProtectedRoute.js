@@ -7,24 +7,22 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Small delay to ensure localStorage is ready
     const timer = setTimeout(() => {
       checkAuth();
-    }, 10);
+    }, 5);
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
   const checkAuth = () => {
     const token = checkAuthToken();
-    const guest = localStorage.getItem("guest_mode") === "true";
-    
-    console.log("Auth check:", { token: !!token, guest, path: location.pathname });
-    
-    if (token || guest) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
+    let guest = isGuestMode();
+
+    if (!token && !guest) {
+      localStorage.setItem("guest_mode", "true");
+      guest = true;
     }
+
+    setIsAuthenticated(Boolean(token || guest));
   };
 
   // Show loading state while checking authentication

@@ -47,11 +47,8 @@ const LandingPage = () => {
 	const navigate = useNavigate();
 
 	const handleGuestDemo = () => {
-		localStorage.setItem("guest_mode", "true");
-		// Use setTimeout to ensure localStorage is set before navigation
-		setTimeout(() => {
-			navigate("/dashboard", { replace: true });
-		}, 0);
+		// Route through /guest so the guest flag is set before hitting protected routes
+		navigate("/guest", { replace: true });
 	};
 	return (
 		<div className="min-h-screen bg-[#050506] text-gray-100">

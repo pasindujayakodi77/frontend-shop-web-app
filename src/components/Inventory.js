@@ -373,8 +373,9 @@ const Inventory = () => {
                     name="productNumber"
                     value={formData.productNumber}
                     onChange={handleInputChange}
-                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
-                    placeholder="Leave blank to auto-generate per user"
+                    disabled={Boolean(editingProduct)}
+                    className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:text-slate-400"
+                    placeholder={editingProduct ? "Product number cannot be changed" : "Leave blank to auto-generate per user"}
                   />
                 </div>
 

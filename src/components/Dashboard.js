@@ -220,9 +220,45 @@ const Dashboard = () => {
   }
 
   const statsDisplay = [
-    { label: "Monthly Revenue", value: `LKR ${stats.monthlyRevenue.toFixed(2)}`, icon: "💰" },
-    { label: "Average Order Value", value: `LKR ${stats.averageOrderValue.toFixed(2)}`, icon: "🧾" },
-    { label: "Net Margin", value: `${stats.netMarginPct.toFixed(1)}%`, icon: "📈" },
+    {
+      label: "Monthly Revenue",
+      value: `LKR ${stats.monthlyRevenue.toFixed(2)}`,
+      iconBg: "from-emerald-400/30 via-emerald-500/60 to-emerald-600/60",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 7h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" />
+          <path d="M4 7l3-3h10l3 3" />
+          <path d="M12 11v4" />
+          <path d="M9.5 13h5" />
+        </svg>
+      ),
+    },
+    {
+      label: "Average Order Value",
+      value: `LKR ${stats.averageOrderValue.toFixed(2)}`,
+      iconBg: "from-cyan-400/30 via-sky-500/60 to-blue-500/60",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 4h12l-1.5 12.5a2 2 0 0 1-2 1.5H9.5a2 2 0 0 1-2-1.5L6 4z" />
+          <path d="M9 8h6" />
+          <path d="M10 12h4" />
+          <path d="M9 20a1 1 0 1 0 0-2" />
+          <path d="M15 20a1 1 0 1 0 0-2" />
+        </svg>
+      ),
+    },
+    {
+      label: "Net Margin",
+      value: `${stats.netMarginPct.toFixed(1)}%`,
+      iconBg: "from-amber-400/30 via-orange-500/60 to-rose-500/60",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 18l6-6 4 4 6-6" />
+          <path d="M20 6v6h-6" />
+          <path d="M4 20h16" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -279,7 +315,7 @@ const Dashboard = () => {
                     <p className="text-xs uppercase tracking-[0.08em] text-gray-400">{stat.label}</p>
                     <p className="text-3xl font-semibold text-gray-50">{stat.value}</p>
                   </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f2937] via-[#0ea5e9] to-[#22c55e] text-gray-50 text-2xl shadow-lg shadow-black/40">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${stat.iconBg} text-gray-50 shadow-lg shadow-black/40`}>
                     {stat.icon}
                   </div>
                 </div>

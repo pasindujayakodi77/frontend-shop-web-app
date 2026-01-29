@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const features = [
 	{
@@ -43,6 +44,12 @@ const steps = [
 ];
 
 const LandingPage = () => {
+	const navigate = useNavigate();
+
+	const handleGuestDemo = () => {
+		localStorage.setItem("guest_mode", "true");
+		navigate("/dashboard");
+	};
 	return (
 		<div className="min-h-screen bg-[#050506] text-gray-100">
 			<div className="absolute inset-0 overflow-hidden">
@@ -100,12 +107,12 @@ const LandingPage = () => {
 							Nova Retail OS combines inventory, sales, and spend into a single command center with automation-first workflows and beautiful reporting.
 						</p>
 						<div className="flex flex-wrap gap-3">
-							<a
-								href="/guest"
+							<button
+								onClick={handleGuestDemo}
 								className="btn-primary px-6 py-3 text-sm"
 							>
 								Try Free Demo
-							</a>
+							</button>
 							<a
 								href="/signup"
 								className="btn-secondary px-6 py-3 text-sm font-semibold"

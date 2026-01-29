@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { isAuthenticated as checkAuthToken, isGuestMode } from "../utils/auth";
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -9,8 +10,9 @@ const ProtectedRoute = ({ children }) => {
   }, []);
 
   const checkAuth = () => {
-    const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
+    const token = checkAuthToken();
+    const guest = isGuestMode();
+    setIsAuthenticated(token || guest);
   };
 
   // Show loading state while checking authentication

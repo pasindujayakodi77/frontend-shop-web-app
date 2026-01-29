@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import OAuthHandler from "./components/OAuthHandler";
 import SocialEmail from "./components/SocialEmail";
 import LandingPage from "./components/LandingPage";
+import GuestEntry from "./components/GuestEntry";
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/guest" element={<Inventory guestMode />} />
+        <Route path="/guest" element={<GuestEntry />} />
         <Route path="/oauth/callback" element={<OAuthHandler />} />
         <Route path="/social-email" element={<SocialEmail />} />
         <Route 

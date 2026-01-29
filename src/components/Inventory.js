@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productsAPI } from "../utils/api";
+import { isGuestMode } from "../utils/auth";
 
 const BASE_FORM_STATE = {
   name: "",
@@ -29,8 +30,9 @@ const Inventory = ({ guestMode = false }) => {
   const [lowStockLoading, setLowStockLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [formData, setFormData] = useState(() => buildFormState());
+  const effectiveGuest = guestMode || isGuestMode();
   const [guestCount, setGuestCount] = useState(() => {
-    if (!guestMode) return 0;
+    if (!effectiveGuest) return 0;
     const raw = localStorage.getItem("guest_inventory_count");
     const parsed = raw ? parseInt(raw, 10) : 0;
     return Number.isFinite(parsed) ? parsed : 0;
@@ -41,12 +43,12 @@ const Inventory = ({ guestMode = false }) => {
     fetchProducts();
     fetchHistory();
     fetchLowStock();
-  }, []);
+  }, [effectiveGuest]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      if (guestMode) {
+      if (effectiveGuest) {
         const demoData = JSON.parse(localStorage.getItem("guest_inventory")) || [];
         setProducts(Array.isArray(demoData) ? demoData : []);
       } else {
@@ -67,7 +69,7 @@ const Inventory = ({ guestMode = false }) => {
   const fetchHistory = async () => {
     try {
       setHistoryLoading(true);
-      if (guestMode) {
+      if (effectiveGuest) {
         setHistory([]);
       } else {
         const data = await productsAPI.getHistory();
@@ -85,7 +87,7 @@ const Inventory = ({ guestMode = false }) => {
   const fetchLowStock = async () => {
     try {
       setLowStockLoading(true);
-      if (guestMode) {
+      if (effectiveGuest) {
         const demoData = JSON.parse(localStorage.getItem("guest_inventory")) || [];
         const low = demoData.filter((p) => p.quantity <= (p.lowStockThreshold ?? 5));
         setLowStock(low);
@@ -133,7 +135,7 @@ const Inventory = ({ guestMode = false }) => {
     }
 
     try {
-      if (guestMode) {
+      if (effectiveGuest) {
         // Guest mode: limit to 2 items total
         const current = JSON.parse(localStorage.getItem("guest_inventory")) || [];
         const isEditing = Boolean(editingProduct);
@@ -215,7 +217,7 @@ const Inventory = ({ guestMode = false }) => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        if (guestMode) {
+        if (effectiveGuest) {
           const current = JSON.parse(localStorage.getItem("guest_inventory")) || [];
           const updated = current.filter((p) => (p._id || p.id) !== id);
           localStorage.setItem("guest_inventory", JSON.stringify(updated));
@@ -239,7 +241,7 @@ const Inventory = ({ guestMode = false }) => {
   };
 
   const handleBackToDashboard = () => {
-    if (guestMode) {
+    if (effectiveGuest) {
       navigate("/");
     } else {
       navigate("/dashboard");
@@ -339,7 +341,7 @@ const Inventory = ({ guestMode = false }) => {
             <div>
               <h2 className="text-xl font-semibold text-slate-50">Products List</h2>
               <p className="text-sm text-slate-400">
-                {guestMode
+                {effectiveGuest
                   ? "Guest mode: add up to 2 items. Sign up to unlock full inventory."
                   : "Manage stock, pricing, and categories."}
               </p>
@@ -366,7 +368,7 @@ const Inventory = ({ guestMode = false }) => {
                 >
                   Last 7 days
                 </button>
-                {!guestMode && (
+                {!effectiveGuest && (
                   <button
                     onClick={() => setActiveTab("history")}
                     className={`rounded-lg px-3 py-1.5 transition ${
@@ -662,7 +664,7 @@ const Inventory = ({ guestMode = false }) => {
             </>
           )}
 
-          {activeTab === "history" && !guestMode && (
+          {activeTab === "history" && !effectiveGuest && (
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
               {historyLoading ? (
                 <div className="p-12 text-center text-slate-400">Loading history...</div>

@@ -2,6 +2,13 @@ export const isAuthenticated = () => {
   return !!localStorage.getItem("token");
 };
 
+// Guest mode flag (set when entering /guest)
+export const isGuestMode = () => {
+  const hasToken = isAuthenticated();
+  const guestFlag = localStorage.getItem("guest_mode") === "true";
+  return guestFlag && !hasToken;
+};
+
 // Get user ID from localStorage
 export const getUserId = () => {
   return localStorage.getItem("userId");

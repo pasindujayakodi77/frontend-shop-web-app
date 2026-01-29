@@ -3,6 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { clearUserData } from '../utils/auth';
 import { salesAPI, productsAPI } from '../utils/api';
 
+const EditIcon = ({ className = "" }) => (
+  <svg
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    className={className}
+  >
+    <path d="M4 12.5V15h2.5L14.75 6.75a1 1 0 0 0 0-1.5l-1-1a1 1 0 0 0-1.5 0L4 12.5Z" />
+    <path d="M11.5 5.5 14 8" />
+  </svg>
+);
+
+const DeleteIcon = ({ className = "" }) => (
+  <svg
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    className={className}
+  >
+    <path d="M6 6h8" />
+    <path d="M8 6V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1" />
+    <path d="M7.5 6h5l-.5 10h-4l-.5-10Z" />
+  </svg>
+);
+
 const Sales = () => {
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
@@ -542,14 +573,16 @@ const Sales = () => {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEdit(sale)}
-                                className="btn-ghost px-3 py-1.5 text-xs font-semibold"
+                                className="btn-ghost inline-flex items-center px-3 py-1.5 text-xs font-semibold"
                               >
+                                <EditIcon className="h-4 w-4 mr-1" />
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDelete(sale._id || sale.id)}
-                                className="btn-danger px-3 py-1.5 text-xs font-semibold"
+                                className="btn-danger inline-flex items-center px-3 py-1.5 text-xs font-semibold"
                               >
+                                <DeleteIcon className="h-4 w-4 mr-1" />
                                 Delete
                               </button>
                             </div>

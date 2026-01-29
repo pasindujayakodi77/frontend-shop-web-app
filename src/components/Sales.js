@@ -44,12 +44,25 @@ const Sales = () => {
   const [sellingMethod, setSellingMethod] = useState('pos');
   const [customerName, setCustomerName] = useState('');
   const [barcodeInput, setBarcodeInput] = useState('');
+  const [activityLog, setActivityLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Load sales and products from backend API
     fetchSalesAndProducts();
+    // Restore recent activity log from localStorage (best-effort only)
+    const cachedLog = localStorage.getItem('salesActivityLog');
+    if (cachedLog) {
+      try {
+        const parsed = JSON.parse(cachedLog);
+        if (Array.isArray(parsed)) {
+          setActivityLog(parsed);
+        }
+      } catch (err) {
+        console.warn('Failed to parse sales activity log cache', err);
+      }
+    }
   }, []);
 
   const fetchSalesAndProducts = async () => {
@@ -170,6 +183,7 @@ const Sales = () => {
     try {
       if (editSaleId) {
         // Update existing sale
+        const previousSale = sales.find((s) => (s._id || s.id) === editSaleId);
         await salesAPI.update(editSaleId, newSale);
         // Do not attempt inventory reconciliation here
         await fetchSalesAndProducts();
@@ -178,6 +192,13 @@ const Sales = () => {
         setSaleDate(new Date().toISOString().slice(0, 10));
         setSellingMethod('pos');
         setShowForm(false);
+        recordActivity({
+          type: 'edit',
+          saleNumber: previousSale?.saleNumber || previousSale?._id || previousSale?.id || editSaleId,
+          customer: previousSale?.customerName || customerName || '-',
+          method: previousSale?.sellingMethod || sellingMethod,
+          detail: `Updated sale with ${validProducts.length} product(s)`
+        });
         alert("Sale updated successfully!");
       } else {
         // Use backend selling method to create sale and update inventory atomically
@@ -227,8 +248,16 @@ const Sales = () => {
   const handleDelete = async (saleId) => {
     if (!window.confirm('Are you sure you want to delete this sale?')) return;
     try {
+      const removedSale = sales.find((s) => (s._id || s.id) === saleId);
       await salesAPI.delete(saleId);
       await fetchSalesAndProducts();
+      recordActivity({
+        type: 'delete',
+        saleNumber: removedSale?.saleNumber || removedSale?._id || removedSale?.id || saleId,
+        customer: removedSale?.customerName || '-',
+        method: removedSale?.sellingMethod || '-',
+        detail: 'Sale deleted'
+      });
       alert('Sale deleted');
     } catch (err) {
       console.error('Error deleting sale:', err);
@@ -261,6 +290,24 @@ const Sales = () => {
       hour: "2-digit",
       minute: "2-digit"
     });
+  };
+
+  const recordActivity = (entry) => {
+    const next = [
+      {
+        ...entry,
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        at: new Date().toISOString()
+      },
+      ...activityLog
+    ].slice(0, 50); // keep log small
+    setActivityLog(next);
+    localStorage.setItem('salesActivityLog', JSON.stringify(next));
+  };
+
+  const handleClearActivity = () => {
+    setActivityLog([]);
+    localStorage.removeItem('salesActivityLog');
   };
 
   const formatCurrency = (amount) => {
@@ -595,6 +642,42 @@ const Sales = () => {
               </div>
             )}
           </div>
+
+          {activityLog.length > 0 && (
+            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-50">Edit/Delete Activity</h2>
+                  <p className="text-sm text-slate-400">Recent changes to sales (local log)</p>
+                </div>
+                <button onClick={handleClearActivity} className="btn-ghost text-xs font-semibold px-3 py-1.5">Clear</button>
+              </div>
+              <div className="divide-y divide-slate-800/70">
+                {activityLog.map((entry) => (
+                  <div key={entry.id} className="px-6 py-4 flex items-center gap-3">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg border ${entry.type === 'delete' ? 'border-rose-500/40 text-rose-300 bg-rose-500/10' : 'border-cyan-400/40 text-cyan-200 bg-cyan-500/10'}`}>
+                      {entry.type === 'delete' ? (
+                        <DeleteIcon className="h-4 w-4" />
+                      ) : (
+                        <EditIcon className="h-4 w-4" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-slate-50 font-semibold">
+                        {entry.type === 'delete' ? 'Sale deleted' : 'Sale edited'} · {entry.saleNumber ? `#${entry.saleNumber}` : 'unknown'}
+                      </div>
+                      <div className="text-xs text-slate-400">
+                        {entry.detail || ''}
+                        {entry.customer ? ` · Customer: ${entry.customer}` : ''}
+                        {entry.method ? ` · Method: ${(entry.method || '').toString().toUpperCase()}` : ''}
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-400 whitespace-nowrap">{formatDate(entry.at)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sales.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

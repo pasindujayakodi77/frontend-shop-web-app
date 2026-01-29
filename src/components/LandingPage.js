@@ -101,7 +101,7 @@ const LandingPage = () => {
 						</p>
 						<div className="flex flex-wrap gap-3">
 							<a
-								href="/#signup"
+								href="/guest"
 								className="btn-primary px-6 py-3 text-sm"
 							>
 								Try Free Demo

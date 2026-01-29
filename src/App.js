@@ -19,6 +19,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/guest" element={<Inventory guestMode />} />
         <Route path="/oauth/callback" element={<OAuthHandler />} />
         <Route path="/social-email" element={<SocialEmail />} />
         <Route 

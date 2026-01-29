@@ -18,7 +18,7 @@ function buildFormState(overrides = {}) {
   return { ...BASE_FORM_STATE, ...overrides };
 }
 
-const Inventory = () => {
+const Inventory = ({ guestMode = false }) => {
   const [products, setProducts] = useState([]);
   const [history, setHistory] = useState([]);
   const [lowStock, setLowStock] = useState([]);
@@ -29,6 +29,12 @@ const Inventory = () => {
   const [lowStockLoading, setLowStockLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [formData, setFormData] = useState(() => buildFormState());
+  const [guestCount, setGuestCount] = useState(() => {
+    if (!guestMode) return 0;
+    const raw = localStorage.getItem("guest_inventory_count");
+    const parsed = raw ? parseInt(raw, 10) : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,10 +46,15 @@ const Inventory = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await productsAPI.getAll();
-      const productsArray = data.products || data;
-      const normalizedProducts = Array.isArray(productsArray) ? productsArray : [];
-      setProducts(normalizedProducts);
+      if (guestMode) {
+        const demoData = JSON.parse(localStorage.getItem("guest_inventory")) || [];
+        setProducts(Array.isArray(demoData) ? demoData : []);
+      } else {
+        const data = await productsAPI.getAll();
+        const productsArray = data.products || data;
+        const normalizedProducts = Array.isArray(productsArray) ? productsArray : [];
+        setProducts(normalizedProducts);
+      }
     } catch (error) {
       console.error("Error fetching products:", error);
       setProducts([]);
@@ -56,9 +67,13 @@ const Inventory = () => {
   const fetchHistory = async () => {
     try {
       setHistoryLoading(true);
-      const data = await productsAPI.getHistory();
-      const historyArray = data.history || data;
-      setHistory(Array.isArray(historyArray) ? historyArray : []);
+      if (guestMode) {
+        setHistory([]);
+      } else {
+        const data = await productsAPI.getHistory();
+        const historyArray = data.history || data;
+        setHistory(Array.isArray(historyArray) ? historyArray : []);
+      }
     } catch (error) {
       console.error("Error fetching product history:", error);
       setHistory([]);
@@ -70,9 +85,15 @@ const Inventory = () => {
   const fetchLowStock = async () => {
     try {
       setLowStockLoading(true);
-      const data = await productsAPI.getLowStock();
-      const lowStockArray = data.products || data;
-      setLowStock(Array.isArray(lowStockArray) ? lowStockArray : []);
+      if (guestMode) {
+        const demoData = JSON.parse(localStorage.getItem("guest_inventory")) || [];
+        const low = demoData.filter((p) => p.quantity <= (p.lowStockThreshold ?? 5));
+        setLowStock(low);
+      } else {
+        const data = await productsAPI.getLowStock();
+        const lowStockArray = data.products || data;
+        setLowStock(Array.isArray(lowStockArray) ? lowStockArray : []);
+      }
     } catch (error) {
       console.error("Error fetching low stock products:", error);
       setLowStock([]);
@@ -112,11 +133,39 @@ const Inventory = () => {
     }
 
     try {
-      if (editingProduct) {
-        await productsAPI.update(editingProduct._id || editingProduct.id, productData);
+      if (guestMode) {
+        // Guest mode: limit to 2 items total
+        const current = JSON.parse(localStorage.getItem("guest_inventory")) || [];
+        const isEditing = Boolean(editingProduct);
+        if (!isEditing && current.length >= 2) {
+          const goSignup = window.confirm("Guest mode allows up to 2 items. Sign up now to add more?");
+          if (goSignup) {
+            navigate("/signup");
+          }
+          return;
+        }
+
+        let updated;
+        if (isEditing) {
+          updated = current.map((p) =>
+            (p._id || p.id) === (editingProduct._id || editingProduct.id) ? { ...p, ...productData } : p
+          );
+        } else {
+          const id = `guest-${Date.now()}`;
+          updated = [...current, { ...productData, id }];
+          const nextCount = guestCount + 1;
+          setGuestCount(nextCount);
+          localStorage.setItem("guest_inventory_count", String(nextCount));
+        }
+        localStorage.setItem("guest_inventory", JSON.stringify(updated));
         setEditingProduct(null);
       } else {
-        await productsAPI.create(productData);
+        if (editingProduct) {
+          await productsAPI.update(editingProduct._id || editingProduct.id, productData);
+          setEditingProduct(null);
+        } else {
+          await productsAPI.create(productData);
+        }
       }
 
       await fetchProducts();
@@ -166,7 +215,13 @@ const Inventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await productsAPI.delete(id);
+        if (guestMode) {
+          const current = JSON.parse(localStorage.getItem("guest_inventory")) || [];
+          const updated = current.filter((p) => (p._id || p.id) !== id);
+          localStorage.setItem("guest_inventory", JSON.stringify(updated));
+        } else {
+          await productsAPI.delete(id);
+        }
         await fetchProducts();
         await fetchHistory();
         await fetchLowStock();
@@ -184,7 +239,11 @@ const Inventory = () => {
   };
 
   const handleBackToDashboard = () => {
-    navigate("/dashboard");
+    if (guestMode) {
+      navigate("/");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   const displayedProducts = useMemo(() => {
@@ -262,10 +321,28 @@ const Inventory = () => {
         </header>
 
         <main className="space-y-6">
+          {guestMode && (
+            <div className="rounded-2xl border border-cyan-500/40 bg-cyan-500/10 backdrop-blur-xl px-4 py-3 shadow-[0_18px_80px_-45px_rgba(34,211,238,0.35)] ring-1 ring-cyan-300/30 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-cyan-100/90">
+                Guest mode lets you try inventory with up to 2 items. Sign up to unlock unlimited products and history.
+              </div>
+              <button
+                onClick={() => navigate("/signup")}
+                className="btn-primary px-4 py-2 text-xs sm:text-sm"
+              >
+                Sign Up Free
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-slate-50">Products List</h2>
-              <p className="text-sm text-slate-400">Manage stock, pricing, and categories.</p>
+              <p className="text-sm text-slate-400">
+                {guestMode
+                  ? "Guest mode: add up to 2 items. Sign up to unlock full inventory."
+                  : "Manage stock, pricing, and categories."}
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <div className="inline-flex rounded-xl border border-slate-800/70 bg-slate-900/60 p-1 text-sm font-semibold text-slate-200">
@@ -289,16 +366,18 @@ const Inventory = () => {
                 >
                   Last 7 days
                 </button>
-                <button
-                  onClick={() => setActiveTab("history")}
-                  className={`rounded-lg px-3 py-1.5 transition ${
-                    activeTab === "history"
-                      ? "bg-slate-800 text-white shadow-inner shadow-slate-900"
-                      : "hover:text-white"
-                  }`}
-                >
-                  History
-                </button>
+                {!guestMode && (
+                  <button
+                    onClick={() => setActiveTab("history")}
+                    className={`rounded-lg px-3 py-1.5 transition ${
+                      activeTab === "history"
+                        ? "bg-slate-800 text-white shadow-inner shadow-slate-900"
+                        : "hover:text-white"
+                    }`}
+                  >
+                    History
+                  </button>
+                )}
               </div>
               <button
                 onClick={() => {
@@ -583,7 +662,7 @@ const Inventory = () => {
             </>
           )}
 
-          {activeTab === "history" && (
+          {activeTab === "history" && !guestMode && (
             <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5 overflow-hidden">
               {historyLoading ? (
                 <div className="p-12 text-center text-slate-400">Loading history...</div>

@@ -444,10 +444,6 @@ const Sales = () => {
     localStorage.setItem('salesActivityLog', JSON.stringify(next));
   };
 
-  const handleClearActivity = () => {
-    setActivityLog([]);
-    localStorage.removeItem('salesActivityLog');
-  };
 
   const formatCurrency = (amount) => {
     return `LKR ${amount.toFixed(2)}`;
@@ -794,7 +790,7 @@ const Sales = () => {
                   <h2 className="text-lg font-semibold text-slate-50">Edit/Delete Activity</h2>
                   <p className="text-sm text-slate-400">Recent changes to sales (local log)</p>
                 </div>
-                <button onClick={handleClearActivity} className="btn-ghost text-xs font-semibold px-3 py-1.5">Clear</button>
+                {/* Clear button removed to preserve edit/delete history */}
               </div>
               <div className="divide-y divide-slate-800/70">
                 {activityLog.map((entry) => (

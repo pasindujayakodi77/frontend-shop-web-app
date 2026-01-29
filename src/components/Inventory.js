@@ -1,6 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productsAPI } from "../utils/api";
+import { getUserData, getUserId, setUserData } from "../utils/auth";
+
+const BASE_FORM_STATE = {
+  name: "",
+  productNumber: "",
+  barcode: "",
+  brand: "",
+  category: "",
+  quantity: "",
+  costPrice: "",
+  sellingPrice: "",
+  lowStockThreshold: "5"
+};
+
+function buildFormState(overrides = {}) {
+  return { ...BASE_FORM_STATE, ...overrides };
+}
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);
@@ -12,18 +29,45 @@ const Inventory = () => {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [lowStockLoading, setLowStockLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [formData, setFormData] = useState({
-    name: "",
-    productNumber: "",
-    barcode: "",
-    brand: "",
-    category: "",
-    quantity: "",
-    costPrice: "",
-    sellingPrice: "",
-    lowStockThreshold: "5"
-  });
+  const [formData, setFormData] = useState(() => buildFormState());
+  const userId = getUserId();
+  const PRODUCT_COUNTER_KEY = "inventory_product_counter";
   const navigate = useNavigate();
+
+  const getProductNumberPrefix = () => {
+    const userPart = (userId || "USER").toString().replace(/[^a-zA-Z0-9]/g, "");
+    const trimmed = userPart.slice(-4) || "USR";
+    return `INV-${trimmed.toUpperCase()}`;
+  };
+
+  const syncProductCounterFromProducts = (items) => {
+    const prefix = getProductNumberPrefix();
+    const storedCounter = Number(getUserData(PRODUCT_COUNTER_KEY, 0)) || 0;
+
+    const maxFromProducts = Array.isArray(items)
+      ? items.reduce((max, product) => {
+          const value = product?.productNumber;
+          if (typeof value !== "string") return max;
+          if (!value.startsWith(prefix)) return max;
+
+          const numericPart = value.slice(prefix.length).replace(/^[^0-9]*/, "");
+          const parsed = parseInt(numericPart, 10);
+          return Number.isNaN(parsed) ? max : Math.max(max, parsed);
+        }, 0)
+      : 0;
+
+    const resolved = Math.max(storedCounter, maxFromProducts);
+    setUserData(PRODUCT_COUNTER_KEY, resolved);
+    return resolved;
+  };
+
+  const generateProductNumber = (items = products) => {
+    const prefix = getProductNumberPrefix();
+    const currentMax = syncProductCounterFromProducts(items);
+    const next = (currentMax || 0) + 1;
+    setUserData(PRODUCT_COUNTER_KEY, next);
+    return `${prefix}-${String(next).padStart(4, "0")}`;
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -36,7 +80,9 @@ const Inventory = () => {
       setLoading(true);
       const data = await productsAPI.getAll();
       const productsArray = data.products || data;
-      setProducts(Array.isArray(productsArray) ? productsArray : []);
+      const normalizedProducts = Array.isArray(productsArray) ? productsArray : [];
+      setProducts(normalizedProducts);
+      syncProductCounterFromProducts(normalizedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
       setProducts([]);
@@ -85,9 +131,13 @@ const Inventory = () => {
     const trimmedBarcode = formData.barcode.trim();
     const trimmedProductNumber = formData.productNumber.trim();
 
+    const resolvedProductNumber = trimmedProductNumber === ""
+      ? (editingProduct?.productNumber || generateProductNumber())
+      : trimmedProductNumber;
+
     const productData = {
       name: formData.name,
-      productNumber: trimmedProductNumber === "" ? undefined : trimmedProductNumber,
+      productNumber: resolvedProductNumber,
       barcode: trimmedBarcode === "" ? undefined : trimmedBarcode,
       brand: formData.brand,
       category: formData.category,
@@ -109,17 +159,7 @@ const Inventory = () => {
       await fetchHistory();
       await fetchLowStock();
 
-      setFormData({
-        name: "",
-        productNumber: "",
-        barcode: "",
-        brand: "",
-        category: "",
-        quantity: "",
-        costPrice: "",
-        sellingPrice: "",
-        lowStockThreshold: "5"
-      });
+      setFormData(buildFormState());
       setShowForm(false);
     } catch (error) {
       console.error("Error saving product:", error);
@@ -137,9 +177,16 @@ const Inventory = () => {
     }
   };
 
+  const handleStartCreate = () => {
+    const autoNumber = generateProductNumber();
+    setEditingProduct(null);
+    setFormData(buildFormState({ productNumber: autoNumber }));
+    setShowForm(true);
+  };
+
   const handleEdit = (product) => {
     setEditingProduct(product);
-    setFormData({
+    setFormData(buildFormState({
       name: product.name,
       productNumber: product.productNumber || "",
       barcode: product.barcode || "",
@@ -149,7 +196,7 @@ const Inventory = () => {
       costPrice: product.costPrice.toString(),
       sellingPrice: product.sellingPrice.toString(),
       lowStockThreshold: (product.lowStockThreshold ?? 5).toString()
-    });
+    }));
     setShowForm(true);
   };
 
@@ -170,17 +217,7 @@ const Inventory = () => {
   const handleCancel = () => {
     setShowForm(false);
     setEditingProduct(null);
-    setFormData({
-      name: "",
-      productNumber: "",
-      barcode: "",
-      brand: "",
-      category: "",
-      quantity: "",
-      costPrice: "",
-      sellingPrice: "",
-      lowStockThreshold: "5"
-    });
+    setFormData(buildFormState());
   };
 
   const handleBackToDashboard = () => {
@@ -301,7 +338,13 @@ const Inventory = () => {
                 </button>
               </div>
               <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => {
+                  if (showForm) {
+                    handleCancel();
+                  } else {
+                    handleStartCreate();
+                  }
+                }}
                 className="btn-primary px-5 py-2 text-sm"
               >
                 {showForm ? "Cancel" : "+ Add New Product"}
@@ -361,14 +404,14 @@ const Inventory = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-slate-300 mb-2">Product Number</label>
+                  <label className="block text-sm text-slate-300 mb-2">Product Number (auto)</label>
                   <input
                     type="text"
                     name="productNumber"
                     value={formData.productNumber}
                     onChange={handleInputChange}
                     className="w-full rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400/80 focus:ring-2 focus:ring-cyan-500/30"
-                    placeholder="e.g., SKU-1045"
+                    placeholder="Auto-generated per user (editable)"
                   />
                 </div>
 

@@ -255,7 +255,7 @@ const Reports = () => {
           <p className="text-slate-400 mb-4">{error}</p>
           <button
             onClick={fetchMonthlySummary}
-            className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+            className="btn-primary px-5 py-2 text-sm"
           >
             Retry
           </button>
@@ -277,9 +277,12 @@ const Reports = () => {
         <header className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/35 text-slate-900">
-                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-                  <path d="M6 6h12M6 12h12M6 18h7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/12 bg-[#0d0e12] text-gray-50 shadow-[0_12px_36px_-18px_rgba(0,0,0,0.85)]">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 7.5h9.5a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h9" />
+                  <circle cx="5" cy="7.5" r="1.6" />
+                  <circle cx="10" cy="16.5" r="1.6" />
+                  <circle cx="19" cy="13.5" r="1.6" />
                 </svg>
               </div>
               <div>
@@ -291,13 +294,13 @@ const Reports = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300"
+                className="btn-secondary px-4 py-2 text-sm"
               >
                 Dashboard
               </button>
               <button
                 onClick={handleLogout}
-                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+                className="btn-secondary px-4 py-2 text-sm"
               >
                 Logout
               </button>
@@ -309,13 +312,13 @@ const Reports = () => {
           <div className="flex flex-wrap gap-3 justify-end">
             <button
               onClick={downloadPDF}
-              className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+              className="btn-primary px-5 py-2.5 text-sm"
             >
               Download PDF
             </button>
             <button
               onClick={downloadExcel}
-              className="rounded-xl border border-slate-700/70 bg-slate-800/70 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-emerald-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-300"
+              className="btn-secondary px-5 py-2.5 text-sm"
             >
               Download Excel
             </button>

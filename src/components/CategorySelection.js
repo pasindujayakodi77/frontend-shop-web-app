@@ -95,23 +95,12 @@ const CategorySelection = () => {
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
         <div className="w-full max-w-3xl space-y-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/40">
-              <svg
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="h-6 w-6 text-slate-900"
-              >
-                <path
-                  d="M4 6h2l1.5 9h9l1.5-6H7"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="10" cy="18" r="1" fill="currentColor" />
-                <circle cx="16" cy="18" r="1" fill="currentColor" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/12 bg-[#0d0e12] text-gray-50 shadow-[0_12px_36px_-18px_rgba(0,0,0,0.85)]">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 7.5h9.5a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h9" />
+                <circle cx="5" cy="7.5" r="1.6" />
+                <circle cx="10" cy="16.5" r="1.6" />
+                <circle cx="19" cy="13.5" r="1.6" />
               </svg>
             </div>
             <div>

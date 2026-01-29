@@ -226,33 +226,34 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="relative min-h-screen overflow-hidden bg-[#050506] text-gray-100">
       <div className="pointer-events-none absolute inset-0 select-none">
-        <div className="absolute -top-44 -left-36 h-80 w-80 rounded-full bg-cyan-500/16 blur-3xl" />
-        <div className="absolute -bottom-52 -right-28 h-96 w-96 rounded-full bg-emerald-500/14 blur-[110px]" />
-        <div className="absolute top-1/3 right-1/4 h-44 w-44 rotate-12 rounded-full bg-gradient-to-br from-blue-600/25 via-cyan-500/25 to-emerald-400/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.03),_transparent_35%)]" />
+        <div className="absolute -top-44 -left-36 h-80 w-80 rounded-full bg-[#0f1116]/70 blur-3xl" />
+        <div className="absolute -bottom-52 -right-28 h-96 w-96 rounded-full bg-[#0c0d11]/65 blur-[110px]" />
+        <div className="absolute top-1/3 right-1/4 h-44 w-44 rotate-12 rounded-full bg-gradient-to-br from-[#16181f]/35 via-[#0d0e12]/35 to-[#0b0c10]/20 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.025),_transparent_35%)]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <header className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+        <header className="rounded-2xl border border-white/10 bg-[#0b0c10]/75 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/35 text-slate-900">
-                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-                  <path d="M4 6h2l1.5 9h9l1.5-6H7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="10" cy="18" r="1" fill="currentColor" />
-                  <circle cx="16" cy="18" r="1" fill="currentColor" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/12 bg-[#0d0e12] text-gray-50 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.8)]">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 7.5h9.5a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h9" />
+                  <circle cx="5" cy="7.5" r="1.6" />
+                  <circle cx="10" cy="16.5" r="1.6" />
+                  <circle cx="19" cy="13.5" r="1.6" />
                 </svg>
               </div>
               <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Dashboard</p>
-                <h1 className="text-2xl font-semibold text-slate-50">ShopFlow Control Center</h1>
+                <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Dashboard</p>
+                <h1 className="text-2xl font-semibold text-gray-50">ShopFlow Control Center</h1>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+              className="btn-secondary px-4 py-2 text-sm"
             >
               Logout
             </button>
@@ -260,10 +261,10 @@ const Dashboard = () => {
         </header>
 
         <main className="space-y-8">
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+          <div className="rounded-2xl border border-white/10 bg-[#0b0c10]/75 backdrop-blur-xl p-6 shadow-[0_24px_120px_-50px_rgba(0,0,0,0.7)] ring-1 ring-white/5">
             <div className="flex flex-col gap-2">
-              <h2 className="text-3xl font-semibold text-slate-50">Welcome, {user?.name || "User"}! 👋</h2>
-              <p className="text-sm text-slate-400">Shop category: <span className="font-semibold text-cyan-300">{user?.category || user?.shopCategory || "N/A"}</span></p>
+              <h2 className="text-3xl font-semibold text-gray-50">Welcome, {user?.name || "User"}! 👋</h2>
+              <p className="text-sm text-gray-400">Shop category: <span className="font-semibold text-emerald-300">{user?.category || user?.shopCategory || "N/A"}</span></p>
             </div>
           </div>
 
@@ -271,14 +272,14 @@ const Dashboard = () => {
             {statsDisplay.map((stat, index) => (
               <div
                 key={index}
-                className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-5 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5"
+                className="rounded-2xl border border-white/10 bg-[#0d0e12]/80 p-5 backdrop-blur-xl shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5"
               >
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-[0.08em] text-slate-400">{stat.label}</p>
-                    <p className="text-3xl font-semibold text-slate-50">{stat.value}</p>
+                    <p className="text-xs uppercase tracking-[0.08em] text-gray-400">{stat.label}</p>
+                    <p className="text-3xl font-semibold text-gray-50">{stat.value}</p>
                   </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-emerald-400 text-slate-900 text-2xl shadow-lg shadow-cyan-500/30">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f2937] via-[#0ea5e9] to-[#22c55e] text-gray-50 text-2xl shadow-lg shadow-black/40">
                     {stat.icon}
                   </div>
                 </div>
@@ -286,27 +287,27 @@ const Dashboard = () => {
             ))}
           </div>
 
-          <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+          <div className="rounded-2xl border border-white/10 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
             <h3 className="text-lg font-semibold text-slate-100 mb-4">Quick actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <button onClick={() => navigate("/inventory")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+              <button onClick={() => navigate("/inventory")} className="btn-secondary w-full px-4 py-3 text-sm font-medium hover:-translate-y-[1px]">
                 Inventory
               </button>
-              <button onClick={() => navigate("/sales")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+              <button onClick={() => navigate("/sales")} className="btn-secondary w-full px-4 py-3 text-sm font-medium hover:-translate-y-[1px]">
                 Sales
               </button>
-              <button onClick={() => navigate("/expenses")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+              <button onClick={() => navigate("/expenses")} className="btn-secondary w-full px-4 py-3 text-sm font-medium hover:-translate-y-[1px]">
                 Expenses
               </button>
-              <button onClick={() => navigate("/reports")} className="rounded-xl border border-slate-800/70 bg-slate-800/60 px-4 py-3 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:-translate-y-[1px] hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300">
+              <button onClick={() => navigate("/reports")} className="btn-secondary w-full px-4 py-3 text-sm font-medium hover:-translate-y-[1px]">
                 Reports
               </button>
             </div>
           </div>
 
           <div className="space-y-8">
-            <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-              <h3 className="text-lg font-semibold text-slate-100 mb-4">Weekly Sales (last 7 days)</h3>
+            <div className="rounded-2xl border border-white/10 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
+              <h3 className="text-lg font-semibold text-gray-100 mb-4">Weekly Sales (last 7 days)</h3>
               <div className="h-80">
                 {chartData.weeklySales && (
                   <Bar
@@ -315,12 +316,12 @@ const Dashboard = () => {
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
-                        legend: { position: "top", labels: { color: "#e2e8f0" } },
+                        legend: { position: "top", labels: { color: "#e5e7eb" } },
                         title: { display: false },
                       },
                       scales: {
-                        x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
-                        y: { beginAtZero: true, ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                        x: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.06)" } },
+                        y: { beginAtZero: true, ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.06)" } },
                       },
                     }}
                   />
@@ -329,8 +330,8 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-                <h3 className="text-lg font-semibold text-slate-100 mb-4">Expenses by Category</h3>
+              <div className="rounded-2xl border border-white/10 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
+                <h3 className="text-lg font-semibold text-gray-100 mb-4">Expenses by Category</h3>
                 <div className="h-80 flex items-center justify-center">
                   {chartData.expensesByCategory ? (
                     <Pie
@@ -339,19 +340,19 @@ const Dashboard = () => {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                          legend: { position: "bottom", labels: { color: "#e2e8f0" } },
-                          title: { display: true, text: "Expense Distribution", color: "#e2e8f0" },
+                          legend: { position: "bottom", labels: { color: "#e5e7eb" } },
+                          title: { display: true, text: "Expense Distribution", color: "#e5e7eb" },
                         },
                       }}
                     />
                   ) : (
-                    <p className="text-slate-400">No expense data available</p>
+                    <p className="text-gray-400">No expense data available</p>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
-                <h3 className="text-lg font-semibold text-slate-100 mb-4">Revenue vs Expenses</h3>
+              <div className="rounded-2xl border border-white/10 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
+                <h3 className="text-lg font-semibold text-gray-100 mb-4">Revenue vs Expenses</h3>
                 <div className="h-80">
                   {chartData.revenueVsExpenses && (
                     <Bar
@@ -360,12 +361,12 @@ const Dashboard = () => {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                          legend: { position: "top", labels: { color: "#e2e8f0" } },
-                          title: { display: true, text: "Monthly Comparison", color: "#e2e8f0" },
+                          legend: { position: "top", labels: { color: "#e5e7eb" } },
+                          title: { display: true, text: "Monthly Comparison", color: "#e5e7eb" },
                         },
                         scales: {
-                          x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
-                          y: { beginAtZero: true, ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
+                            x: { ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.06)" } },
+                            y: { beginAtZero: true, ticks: { color: "#d1d5db" }, grid: { color: "rgba(255,255,255,0.06)" } },
                         },
                       }}
                     />
@@ -375,14 +376,14 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <div className="rounded-2xl border border-white/8 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-100">Top Products</h3>
-                  <span className="text-xs text-slate-400">By quantity sold</span>
+                    <h3 className="text-lg font-semibold text-gray-100">Top Products</h3>
+                    <span className="text-xs text-gray-400">By quantity sold</span>
                 </div>
                 <div className="space-y-3">
                   {lists.topProducts.length === 0 && (
-                    <p className="text-slate-400 text-sm">No product sales yet</p>
+                      <p className="text-gray-400 text-sm">No product sales yet</p>
                   )}
                   {(() => {
                     const items = lists.topProducts || [];
@@ -390,14 +391,14 @@ const Dashboard = () => {
                     return items.map((product) => {
                       const pct = totalRevenue ? ((product.quantity * (product.sellingPrice || 0)) / totalRevenue) * 100 : 0;
                       return (
-                        <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                          <div key={product.productId || product.name} className="flex items-center justify-between rounded-xl border border-white/10 bg-[#101118]/70 px-4 py-3">
                           <div>
-                            <p className="text-sm font-semibold text-slate-100">{product.name}</p>
-                            <p className="text-xs text-slate-400">{product.productNumber || '-'}</p>
-                            <p className="text-xs text-slate-400">Qty sold: {product.quantity}</p>
+                              <p className="text-sm font-semibold text-gray-100">{product.name}</p>
+                              <p className="text-xs text-gray-400">{product.productNumber || '-'}</p>
+                              <p className="text-xs text-gray-400">Qty sold: {product.quantity}</p>
                           </div>
                           <div>
-                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-semibold">
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-semibold">
                               {pct.toFixed(0)}%
                             </span>
                           </div>
@@ -408,14 +409,14 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
+                <div className="rounded-2xl border border-white/8 bg-[#0d0e12]/80 backdrop-blur-xl p-6 shadow-[0_18px_80px_-45px_rgba(0,0,0,0.65)] ring-1 ring-white/5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-100">Recent Sales</h3>
-                  <span className="text-xs text-slate-400">Latest 5 orders</span>
+                    <h3 className="text-lg font-semibold text-gray-100">Recent Sales</h3>
+                    <span className="text-xs text-gray-400">Latest 5 orders</span>
                 </div>
                 <div className="space-y-3">
                   {lists.recentSales.length === 0 && (
-                    <p className="text-slate-400 text-sm">No sales recorded yet</p>
+                      <p className="text-gray-400 text-sm">No sales recorded yet</p>
                   )}
                   {lists.recentSales.map((sale) => {
                     const saleId = String(sale._id || sale.id || 'unknown');
@@ -425,15 +426,15 @@ const Dashboard = () => {
                     const sellingMethodLabel = sellingMethod.charAt(0).toUpperCase() + sellingMethod.slice(1);
 
                     return (
-                      <div key={saleId} className="flex items-center justify-between rounded-xl border border-slate-800/60 bg-slate-800/50 px-4 py-3">
+                      <div key={saleId} className="flex items-center justify-between rounded-xl border border-white/10 bg-[#101118]/70 px-4 py-3">
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold text-slate-100">Sale {saleNumber}</p>
-                          <p className="text-xs text-slate-400" title={customerName}>{truncate(customerName, 24)} • {sellingMethodLabel}</p>
-                          <p className="text-xs text-slate-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
+                          <p className="text-sm font-semibold text-gray-100">Sale {saleNumber}</p>
+                          <p className="text-xs text-gray-400" title={customerName}>{truncate(customerName, 24)} • {sellingMethodLabel}</p>
+                          <p className="text-xs text-gray-400">{sale.items} items • {new Date(sale.date).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="text-sm text-slate-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-semibold">Paid</span>
+                          <div className="text-sm text-gray-50 font-semibold">LKR {sale.totalRevenue?.toFixed(2) || "0.00"}</div>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-semibold">Paid</span>
                         </div>
                       </div>
                     );

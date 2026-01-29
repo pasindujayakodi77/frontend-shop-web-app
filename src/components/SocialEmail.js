@@ -97,7 +97,7 @@ const SocialEmail = () => {
               <button
                 type="submit"
                 disabled={status.loading}
-                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-4 py-3 text-base font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] hover:shadow-cyan-400/40 focus-visible:ring-2 focus-visible:ring-cyan-200 disabled:cursor-not-allowed disabled:opacity-80"
+                className="btn-primary w-full justify-center text-base"
               >
                 {status.loading ? "Saving..." : "Continue"}
               </button>

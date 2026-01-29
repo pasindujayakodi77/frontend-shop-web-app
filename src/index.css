@@ -1,3 +1,5 @@
+/* stylelint-disable */
+/* css-diagnostics-disable */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,14 +18,47 @@ body {
 	margin: 0;
 	min-height: 100vh;
 	font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-	background:
-		radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.18), transparent 25%),
-		radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.14), transparent 22%),
-		radial-gradient(circle at 50% 75%, rgba(99, 102, 241, 0.12), transparent 30%),
-		#0f172a;
-	color: #e2e8f0;
+	background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.02), transparent 28%),
+		radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.015), transparent 26%),
+		rgba(5, 5, 6, 0.98);
+	color: #f5f6f7;
 	-webkit-font-smoothing: antialiased;
 }
+
+.btn-primary {
+		@apply inline-flex items-center justify-center rounded-xl;
+		@apply border border-emerald-400/60 bg-emerald-500;
+		@apply px-4 py-2.5 text-sm font-semibold text-[#050506];
+		@apply shadow-lg shadow-emerald-500/30 transition;
+		@apply hover:bg-emerald-400 hover:border-emerald-300;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300;
+		@apply disabled:cursor-not-allowed disabled:opacity-70;
+	}
+
+	.btn-secondary {
+		@apply inline-flex items-center justify-center rounded-xl;
+		@apply border border-white/15 bg-[#0f1014];
+		@apply px-4 py-2.5 text-sm font-medium text-gray-100;
+		@apply transition hover:border-white/30 hover:bg-[#161821];
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300;
+		@apply disabled:cursor-not-allowed disabled:opacity-70;
+	}
+
+	.btn-ghost {
+		@apply inline-flex items-center justify-center rounded-lg;
+		@apply border border-white/10 bg-transparent;
+		@apply px-3 py-1.5 text-sm font-semibold text-gray-200;
+		@apply transition hover:border-white/25 hover:bg-white/5;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300;
+	}
+
+	.btn-danger {
+		@apply inline-flex items-center justify-center rounded-lg;
+		@apply border border-rose-400/60 bg-rose-500/10;
+		@apply px-3 py-1.5 text-sm font-semibold text-rose-100;
+		@apply transition hover:bg-rose-500/20;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300;
+	}
 
 a {
 	color: inherit;

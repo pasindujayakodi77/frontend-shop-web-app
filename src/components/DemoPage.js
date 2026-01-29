@@ -15,23 +15,23 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const stats = [
-	{ label: "Monthly Revenue", value: "$84,200", detail: "+18% vs last month" },
-	{ label: "Average Order Value", value: "$62.40", detail: "4.2 items per order" },
+	{ label: "Monthly Revenue", value: "LKR 84,200", detail: "+18% vs last month" },
+	{ label: "Average Order Value", value: "LKR 62.40", detail: "4.2 items per order" },
 	{ label: "Net Margin", value: "26.4%", detail: "+2.1 pts vs last month" },
 ];
 
 const products = [
-	{ name: "Carbon Fiber Sneaker", sku: "SN-204", stock: 48, price: "$129", velocity: "+22%" },
-	{ name: "Everyday Tote", sku: "BG-118", stock: 92, price: "$58", velocity: "+9%" },
-	{ name: "Minimal Watch", sku: "WT-303", stock: 35, price: "$199", velocity: "+15%" },
-	{ name: "Athletic Hoodie", sku: "HD-077", stock: 64, price: "$74", velocity: "+11%" },
+	{ name: "Carbon Fiber Sneaker", sku: "SN-204", stock: 48, price: "LKR 129", velocity: "+22%" },
+	{ name: "Everyday Tote", sku: "BG-118", stock: 92, price: "LKR 58", velocity: "+9%" },
+	{ name: "Minimal Watch", sku: "WT-303", stock: 35, price: "LKR 199", velocity: "+15%" },
+	{ name: "Athletic Hoodie", sku: "HD-077", stock: 64, price: "LKR 74", velocity: "+11%" },
 ];
 
 const recentSales = [
-	{ order: "#1045", customer: "Alex R.", total: "$184", status: "Paid", channel: "Web" },
-	{ order: "#1044", customer: "Dakota S.", total: "$246", status: "Paid", channel: "POS" },
-	{ order: "#1043", customer: "Morgan K.", total: "$98", status: "Paid", channel: "Web" },
-	{ order: "#1042", customer: "Lee P.", total: "$312", status: "Paid", channel: "Wholesale" },
+	{ order: "#1045", customer: "Alex R.", total: "LKR 184", status: "Paid", channel: "Web" },
+	{ order: "#1044", customer: "Dakota S.", total: "LKR 246", status: "Paid", channel: "POS" },
+	{ order: "#1043", customer: "Morgan K.", total: "LKR 98", status: "Paid", channel: "Web" },
+	{ order: "#1042", customer: "Lee P.", total: "LKR 312", status: "Paid", channel: "Wholesale" },
 ];
 
 const salesTrend = {
@@ -111,7 +111,7 @@ const DemoPage = () => {
 						</div>
 						<a
 							href="/signup"
-							className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2 text-sm font-semibold text-slate-50 shadow-lg shadow-slate-900/60 transition hover:scale-[1.02]"
+							className="btn-primary px-5 py-2 text-sm"
 						>
 							Sign Up Now
 						</a>
@@ -151,6 +151,13 @@ const DemoPage = () => {
 									plugins: {
 										legend: { labels: { color: "#e2e8f0" } },
 										title: { display: false },
+										tooltip: {
+											callbacks: {
+												label: function(context) {
+													return 'LKR ' + context.parsed.y.toLocaleString();
+												}
+											}
+										}
 									},
 									scales: {
 										x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },
@@ -193,6 +200,13 @@ const DemoPage = () => {
 								plugins: {
 									legend: { labels: { color: "#e2e8f0" } },
 									title: { display: false },
+									tooltip: {
+										callbacks: {
+											label: function(context) {
+												return context.dataset.label + ': LKR ' + context.parsed.y.toLocaleString();
+											}
+										}
+									}
 								},
 								scales: {
 									x: { ticks: { color: "#cbd5e1" }, grid: { color: "rgba(148,163,184,0.2)" } },

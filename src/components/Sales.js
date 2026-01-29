@@ -304,11 +304,12 @@ const Sales = () => {
         <header className="rounded-2xl border border-slate-800/70 bg-slate-900/60 backdrop-blur-xl shadow-[0_24px_120px_-50px_rgba(15,23,42,0.9)] ring-1 ring-white/5">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 via-emerald-400 to-blue-700 shadow-lg shadow-cyan-500/35 text-slate-900">
-                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-                  <path d="M4 6h2l1.5 9h9l1.5-6H7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="10" cy="18" r="1" fill="currentColor" />
-                  <circle cx="16" cy="18" r="1" fill="currentColor" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/12 bg-[#0d0e12] text-gray-50 shadow-[0_12px_36px_-18px_rgba(0,0,0,0.85)]">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="h-6 w-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 7.5h9.5a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h9" />
+                  <circle cx="5" cy="7.5" r="1.6" />
+                  <circle cx="10" cy="16.5" r="1.6" />
+                  <circle cx="19" cy="13.5" r="1.6" />
                 </svg>
               </div>
               <div>
@@ -319,13 +320,13 @@ const Sales = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-cyan-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300"
+                className="btn-secondary px-4 py-2 text-sm"
               >
                 Dashboard
               </button>
               <button
                 onClick={handleLogout}
-                className="rounded-xl border border-slate-700/70 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+                className="btn-secondary px-4 py-2 text-sm"
               >
                 Logout
               </button>
@@ -351,7 +352,7 @@ const Sales = () => {
                 }
                 setShowForm(!showForm);
               }}
-              className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+              className="btn-primary px-5 py-2 text-sm"
             >
               {showForm ? "Cancel" : "Record New Sale"}
             </button>
@@ -380,7 +381,7 @@ const Sales = () => {
                   <button
                     type="button"
                     onClick={handleBarcodeSubmit}
-                    className="sm:mt-[26px] inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+                    className="sm:mt-[26px] inline-flex items-center justify-center btn-primary px-4 py-2.5 text-sm"
                   >
                     Add via Barcode
                   </button>
@@ -459,7 +460,7 @@ const Sales = () => {
                         <button
                           type="button"
                           onClick={() => handleRemoveProductRow(index)}
-                          className="sm:mt-8 inline-flex items-center justify-center rounded-xl border border-rose-400/60 bg-rose-500/10 px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/20"
+                          className="sm:mt-8 inline-flex items-center justify-center btn-danger px-3 py-2 text-sm"
                         >
                           Remove
                         </button>
@@ -470,7 +471,7 @@ const Sales = () => {
                   <button
                     type="button"
                     onClick={handleAddProductRow}
-                    className="rounded-xl border border-slate-800/70 bg-slate-800/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-cyan-300"
+                    className="btn-secondary px-4 py-2 text-sm"
                   >
                     + Add Another Product
                   </button>
@@ -479,14 +480,14 @@ const Sales = () => {
                 <div className="flex flex-wrap gap-3">
                   <button
                     type="submit"
-                    className="rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-emerald-400 px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg shadow-cyan-500/25 transition hover:-translate-y-[1px] focus-visible:ring-2 focus-visible:ring-cyan-200"
+                    className="btn-primary px-5 py-2.5 text-sm"
                   >
                     Record Sale
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="rounded-xl border border-slate-700/70 bg-slate-800/70 px-5 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-rose-400/60 hover:text-white focus-visible:ring-2 focus-visible:ring-rose-300"
+                    className="btn-secondary px-5 py-2.5 text-sm"
                   >
                     Cancel
                   </button>
@@ -547,13 +548,13 @@ const Sales = () => {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handleEdit(sale)}
-                                className="rounded-lg border border-amber-400/60 bg-amber-500/10 px-3 py-1.5 text-amber-100 transition hover:bg-amber-500/20"
+                                className="btn-ghost px-3 py-1.5 text-xs font-semibold"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDelete(sale._id || sale.id)}
-                                className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-3 py-1.5 text-rose-100 transition hover:bg-rose-500/20"
+                                className="btn-danger px-3 py-1.5 text-xs font-semibold"
                               >
                                 Delete
                               </button>

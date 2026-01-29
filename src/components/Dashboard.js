@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, Pie } from "react-chartjs-2";
-import { clearUserData, getUserData } from "../utils/auth";
+import { clearUserData, getUserData, isGuestMode } from "../utils/auth";
 import { dashboardAPI } from "../utils/api";
 import {
   Chart as ChartJS,
@@ -34,6 +34,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [stats, setStats] = useState({
     monthlyRevenue: 0,
     averageOrderValue: 0,
@@ -53,9 +54,125 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const guest = isGuestMode();
+    setIsGuest(guest);
+
+    if (guest) {
+      seedGuestData();
+      return;
+    }
+
     fetchUserData();
     fetchDashboardData();
   }, []);
+
+  const seedGuestData = () => {
+    setUser({ name: "Guest", category: "Demo Shop" });
+    setStats({
+      monthlyRevenue: 84200,
+      averageOrderValue: 62.4,
+      netMarginPct: 26.4,
+      productCount: 128,
+      orderCount: 312,
+    });
+
+    setChartData({
+      weeklySales: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        datasets: [
+          {
+            label: "Weekly Sales",
+            data: [9200, 11340, 10480, 12950, 14880, 17240, 15320],
+            backgroundColor: "rgba(59, 130, 246, 0.8)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+      expensesByCategory: {
+        labels: ["Inventory", "Marketing", "Operations", "Logistics", "SaaS"],
+        datasets: [
+          {
+            label: "Expenses by Category",
+            data: [42, 18, 16, 14, 10],
+            backgroundColor: [
+              "rgba(239, 68, 68, 0.8)",
+              "rgba(249, 115, 22, 0.8)",
+              "rgba(234, 179, 8, 0.8)",
+              "rgba(34, 197, 94, 0.8)",
+              "rgba(59, 130, 246, 0.8)",
+            ],
+            borderColor: [
+              "rgba(239, 68, 68, 1)",
+              "rgba(249, 115, 22, 1)",
+              "rgba(234, 179, 8, 1)",
+              "rgba(34, 197, 94, 1)",
+              "rgba(59, 130, 246, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      revenueVsExpenses: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [
+          {
+            label: "Revenue",
+            data: [62000, 68400, 71200, 75400, 79900, 84200],
+            backgroundColor: "rgba(34, 197, 94, 0.8)",
+            borderColor: "rgba(34, 197, 94, 1)",
+            borderWidth: 1,
+          },
+          {
+            label: "Expenses",
+            data: [44800, 46200, 48900, 50800, 52700, 56600],
+            backgroundColor: "rgba(239, 68, 68, 0.8)",
+            borderColor: "rgba(239, 68, 68, 1)",
+            borderWidth: 1,
+          },
+        ],
+      },
+    });
+
+    setLists({
+      recentSales: [
+        {
+          id: "demo-1045",
+          saleNumber: 1045,
+          customerName: "Alex R.",
+          sellingMethod: "web",
+          items: 4,
+          date: new Date().toISOString(),
+          totalRevenue: 184,
+        },
+        {
+          id: "demo-1044",
+          saleNumber: 1044,
+          customerName: "Dakota S.",
+          sellingMethod: "pos",
+          items: 3,
+          date: new Date().toISOString(),
+          totalRevenue: 246,
+        },
+        {
+          id: "demo-1043",
+          saleNumber: 1043,
+          customerName: "Morgan K.",
+          sellingMethod: "web",
+          items: 2,
+          date: new Date().toISOString(),
+          totalRevenue: 98,
+        },
+      ],
+      topProducts: [
+        { productId: "demo-sn-204", name: "Carbon Fiber Sneaker", productNumber: "SN-204", quantity: 48, sellingPrice: 129 },
+        { productId: "demo-bg-118", name: "Everyday Tote", productNumber: "BG-118", quantity: 92, sellingPrice: 58 },
+        { productId: "demo-wt-303", name: "Minimal Watch", productNumber: "WT-303", quantity: 35, sellingPrice: 199 },
+      ],
+    });
+
+    setLoading(false);
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -192,6 +309,11 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
+    if (isGuest) {
+      localStorage.removeItem("guest_mode");
+      window.location.href = "/";
+      return;
+    }
     clearUserData();
     localStorage.removeItem("token");
     alert("Logged out successfully.");

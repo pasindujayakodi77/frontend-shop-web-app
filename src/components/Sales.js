@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearUserData } from '../utils/auth';
+import { clearUserData, isGuestMode } from '../utils/auth';
 import { salesAPI, productsAPI } from '../utils/api';
 
 const EditIcon = ({ className = "" }) => (
@@ -46,9 +46,18 @@ const Sales = () => {
   const [barcodeInput, setBarcodeInput] = useState('');
   const [activityLog, setActivityLog] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const guest = isGuestMode();
+    setIsGuest(guest);
+
+    if (guest) {
+      seedGuestData();
+      return;
+    }
+
     // Load sales and products from backend API
     fetchSalesAndProducts();
     // Restore recent activity log from localStorage (best-effort only)
@@ -64,6 +73,118 @@ const Sales = () => {
       }
     }
   }, []);
+
+  const seedGuestData = () => {
+    const demoProducts = [
+      {
+        _id: "demo-1",
+        productNumber: "SN-204",
+        name: "Carbon Fiber Sneaker",
+        brand: "Nova",
+        category: "Footwear",
+        sellingPrice: 129,
+        costPrice: 80,
+        quantity: 48,
+      },
+      {
+        _id: "demo-2",
+        productNumber: "BG-118",
+        name: "Everyday Tote",
+        brand: "Nova",
+        category: "Accessories",
+        sellingPrice: 58,
+        costPrice: 32,
+        quantity: 92,
+      },
+      {
+        _id: "demo-3",
+        productNumber: "WT-303",
+        name: "Minimal Watch",
+        brand: "Nova",
+        category: "Watches",
+        sellingPrice: 199,
+        costPrice: 130,
+        quantity: 35,
+      },
+    ];
+
+    const demoSales = [
+      {
+        _id: "demo-sale-1",
+        saleNumber: 1045,
+        date: new Date().toISOString(),
+        sellingMethod: "web",
+        customerName: "Alex R.",
+        products: [
+          {
+            productId: "demo-1",
+            productName: "Carbon Fiber Sneaker",
+            productNumber: "SN-204",
+            category: "Footwear",
+            quantity: 2,
+            sellingPrice: 129,
+            costPrice: 80,
+          },
+        ],
+        totalRevenue: 258,
+        totalProfit: 98,
+      },
+      {
+        _id: "demo-sale-2",
+        saleNumber: 1044,
+        date: new Date(Date.now() - 86400000).toISOString(),
+        sellingMethod: "pos",
+        customerName: "Dakota S.",
+        products: [
+          {
+            productId: "demo-2",
+            productName: "Everyday Tote",
+            productNumber: "BG-118",
+            category: "Accessories",
+            quantity: 3,
+            sellingPrice: 58,
+            costPrice: 32,
+          },
+          {
+            productId: "demo-3",
+            productName: "Minimal Watch",
+            productNumber: "WT-303",
+            category: "Watches",
+            quantity: 1,
+            sellingPrice: 199,
+            costPrice: 130,
+          },
+        ],
+        totalRevenue: 373,
+        totalProfit: 139,
+      },
+    ];
+
+    setProducts(demoProducts);
+    setSales(demoSales);
+    setShowForm(false);
+    setActivityLog([
+      {
+        id: "demo-activity-1",
+        type: "create",
+        saleNumber: 1045,
+        customer: "Alex R.",
+        method: "web",
+        detail: "Recorded demo sale",
+        at: new Date().toISOString(),
+      },
+      {
+        id: "demo-activity-2",
+        type: "create",
+        saleNumber: 1044,
+        customer: "Dakota S.",
+        method: "pos",
+        detail: "Recorded demo sale",
+        at: new Date(Date.now() - 7200000).toISOString(),
+      },
+    ]);
+    setLoading(false);
+  };
 
   const fetchSalesAndProducts = async () => {
     try {
@@ -121,6 +242,11 @@ const Sales = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to record sales.");
+      return;
+    }
 
     // Validate that at least one product is selected
     const validProducts = selectedProducts.filter(
@@ -235,6 +361,10 @@ const Sales = () => {
   };
 
   const handleEdit = (sale) => {
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to edit sales.");
+      return;
+    }
     // Populate form with sale data for editing
     const rows = (sale.products || []).map((p) => ({ productId: p.productId, quantity: p.quantity }));
     setSelectedProducts(rows.length > 0 ? rows : [{ productId: "", quantity: "" }]);
@@ -246,6 +376,10 @@ const Sales = () => {
   };
 
   const handleDelete = async (saleId) => {
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to delete sales.");
+      return;
+    }
     if (!window.confirm('Are you sure you want to delete this sale?')) return;
     try {
       const removedSale = sales.find((s) => (s._id || s.id) === saleId);
@@ -276,6 +410,11 @@ const Sales = () => {
   };
 
   const handleLogout = () => {
+    if (isGuest) {
+      localStorage.removeItem("guest_mode");
+      navigate("/");
+      return;
+    }
     clearUserData();
     localStorage.removeItem("token");
     navigate("/login");
@@ -319,6 +458,11 @@ const Sales = () => {
     e.preventDefault();
     const code = barcodeInput.trim();
     if (!code) return;
+
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to use barcode scanning.");
+      return;
+    }
 
     try {
       const response = await productsAPI.getByBarcode(code);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearUserData } from "../utils/auth";
+import { clearUserData, isGuestMode } from "../utils/auth";
 import { expensesAPI } from "../utils/api";
 
 function Expenses() {
@@ -9,11 +9,31 @@ function Expenses() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const guest = isGuestMode();
+    setIsGuest(guest);
+
+    if (guest) {
+      seedGuestData();
+      return;
+    }
+
     fetchExpenses();
   }, []);
+
+  const seedGuestData = () => {
+    const demoExpenses = [
+      { id: "demo-exp-1", description: "Marketing Campaign", amount: 4200, category: "Marketing", date: new Date().toISOString() },
+      { id: "demo-exp-2", description: "Inventory Restock", amount: 11800, category: "Inventory", date: new Date(Date.now() - 86400000).toISOString() },
+      { id: "demo-exp-3", description: "SaaS Subscriptions", amount: 1600, category: "SaaS", date: new Date(Date.now() - 172800000).toISOString() },
+    ];
+    setExpenses(demoExpenses);
+    setShowForm(false);
+    setLoading(false);
+  };
 
   const fetchExpenses = async () => {
     try {
@@ -39,6 +59,11 @@ function Expenses() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to add expenses.");
+      return;
+    }
+
     if (!formData.description || !formData.amount || !formData.category) {
       alert("Please fill in all fields");
       return;
@@ -63,6 +88,10 @@ function Expenses() {
   };
 
   const handleEdit = (expense) => {
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to edit expenses.");
+      return;
+    }
     setFormData({
       description: expense.description,
       amount: expense.amount,
@@ -73,6 +102,10 @@ function Expenses() {
   };
 
   const handleDelete = async (id) => {
+    if (isGuest) {
+      alert("Guest mode is read-only. Sign up to delete expenses.");
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this expense?")) return;
     try {
       await expensesAPI.delete(id);
@@ -90,6 +123,11 @@ function Expenses() {
   };
 
   const handleLogout = () => {
+    if (isGuest) {
+      localStorage.removeItem("guest_mode");
+      navigate("/");
+      return;
+    }
     clearUserData();
     localStorage.removeItem("token");
     navigate("/login");

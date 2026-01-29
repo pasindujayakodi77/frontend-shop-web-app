@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Line } from "react-chartjs-2";
-import { clearUserData } from "../utils/auth";
+import { clearUserData, isGuestMode } from "../utils/auth";
 import { expensesAPI, productsAPI, salesAPI } from "../utils/api";
 import {
   CategoryScale,
@@ -25,11 +25,58 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dailySalesChart, setDailySalesChart] = useState(null);
+  const [isGuest, setIsGuest] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const guest = isGuestMode();
+    setIsGuest(guest);
+
+    if (guest) {
+      seedGuestData();
+      return;
+    }
+
     fetchMonthlySummary();
   }, []);
+
+  const seedGuestData = () => {
+    setReportData({
+      totalSales: 42,
+      revenue: 84200,
+      profit: 27800,
+      expenses: 31600,
+      netProfit: -3800,
+      topProducts: [
+        { id: "demo-1", name: "Carbon Fiber Sneaker", quantity: 48, revenue: 6192 },
+        { id: "demo-2", name: "Everyday Tote", quantity: 92, revenue: 5336 },
+        { id: "demo-3", name: "Minimal Watch", quantity: 35, revenue: 6965 },
+      ],
+      productsCount: 128,
+    });
+
+    setDailySalesChart({
+      labels: ["Day 1", "Day 5", "Day 10", "Day 15", "Day 20", "Day 25", "Day 30"],
+      datasets: [
+        {
+          label: "Daily Sales (LKR)",
+          data: [2800, 4200, 3900, 5200, 6100, 4800, 7300],
+          borderColor: "#22d3ee",
+          backgroundColor: "rgba(34, 211, 238, 0.15)",
+          fill: true,
+          tension: 0.35,
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          pointBackgroundColor: "#22d3ee",
+          pointBorderColor: "#0f172a",
+          pointBorderWidth: 2,
+        },
+      ],
+    });
+
+    setError(null);
+    setLoading(false);
+  };
 
   const fetchMonthlySummary = async () => {
     try {
@@ -224,6 +271,11 @@ const Reports = () => {
   };
 
   const handleLogout = () => {
+    if (isGuest) {
+      localStorage.removeItem("guest_mode");
+      navigate("/");
+      return;
+    }
     clearUserData();
     localStorage.removeItem("token");
     navigate("/login");
